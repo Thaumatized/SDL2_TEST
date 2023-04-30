@@ -31,11 +31,16 @@ int main()
 	
 	
 	int y = 0;
+	int yChange = 1;
 	while(1)
 	{
 		SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255); // set color to black
 		SDL_RenderClear(renderer); //erase
-		y = (y + 1) % 480;
+		y = y + yChange;
+		if(y == 0 || y == 480)
+		{
+			yChange *= -1;
+		}
 		SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255); // set color to red
 		SDL_RenderDrawLine(renderer, 0, y, 640, 480-y);     // draw a diagonal line
 
