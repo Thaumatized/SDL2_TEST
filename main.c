@@ -1,6 +1,6 @@
 #include <SDL2/SDL.h>
 #include <time.h>
-#include<unistd.h>
+#include <unistd.h>
 
 int main()
 {
@@ -25,8 +25,8 @@ int main()
 		return 1;
 	}
 
-	clock_t starttime = clock();
-	int framerate = 60;
+	int FrameRate = 60;
+	int ClocksPerFrame = CLOCKS_PER_SEC / FrameRate;
 	int frame = 0;
 	
 	
@@ -34,6 +34,7 @@ int main()
 	int yChange = 1;
 	while(1)
 	{
+		clock_t FrameStartClock = clock();
 		SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255); // set color to black
 		SDL_RenderClear(renderer); //erase
 		y = y + yChange;
@@ -67,22 +68,14 @@ int main()
 			break;
 		}
 		
-		long clocks = clock()-starttime;
-		double accuratetime = (double)(clocks)/CLOCKS_PER_SEC;
-		long asframes = accuratetime/((double)1/framerate);
-		//sleep(0.01);
-		printf("frame: %i, clocks: %li, time: %lf, frames: %li\n", frame, clocks, accuratetime, asframes);
-		
-		
-		while(frame >= asframes)
-		{
-			clocks = clock()-starttime;
-			accuratetime = (double)(clocks)/CLOCKS_PER_SEC;
-			asframes = accuratetime/((double)1/framerate);
-			//sleep(0.01);
-		}
-		frame++;
 		printf("frame: %i\n", frame);
+		
+		//Sleep until we have taken up enough time.
+		int ClocksThisFrame = clock()-FrameStartClock;
+		int ClocksToSleep = ClocksPerFrame - ClocksThisFrame;
+		usleep(((double)ClocksToSleep) / ClocksPerFrame / FrameRate * 1000000);
+		
+		frame++;
 	}
 
 	SDL_DestroyRenderer(renderer);
