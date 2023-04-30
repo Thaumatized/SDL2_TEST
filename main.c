@@ -30,20 +30,45 @@ int main()
 	int frame = 0;
 	
 	
-	int y = 0;
-	int yChange = 1;
+	int y[6] =  {
+		480 / 7 * 1,
+		480 / 7 * 3,
+		480 / 7 * 5,
+		480 / 7 * 6,
+		480 / 7 * 4,
+		480 / 7 * 2,
+	};
+	int yChange[6] = {1, 1, 1, -1, -1, -1};
+	int color[6][3] = {
+		{255, 0, 0},
+		{255, 255, 0},
+		{0, 255, 0},
+		{0, 255, 255},
+		{0, 0, 255},
+		{255, 0, 255},
+	};
+	
 	while(1)
 	{
 		clock_t FrameStartClock = clock();
 		SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255); // set color to black
 		SDL_RenderClear(renderer); //erase
-		y = y + yChange;
-		if(y == 0 || y == 480)
+		
+		for(int i = 0; i < 6; i++)
 		{
-			yChange *= -1;
+			y[i] += yChange[i];
+			if(y[i] >= 480)
+			{
+				yChange[i] = -1;
+			}
+			if(y[i] <= 0)
+			{
+				yChange[i] = 1;
+			}
+			
+			SDL_SetRenderDrawColor(renderer, color[i][0], color[i][1], color[i][2], 255); // set color to red
+			SDL_RenderDrawLine(renderer, 0, y[i], 640, 480-y[i]);     // draw a diagonal line
 		}
-		SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255); // set color to red
-		SDL_RenderDrawLine(renderer, 0, y, 640, 480-y);     // draw a diagonal line
 
 		SDL_RenderPresent(renderer);
 
