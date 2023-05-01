@@ -1,6 +1,10 @@
 #include <SDL2/SDL.h>
+#include <SDL2/SDL_image.h>
 #include <time.h>
 #include <unistd.h>
+
+#define WINDOW_X (1366)
+#define WINDOW_Y (768)
 
 int main()
 {
@@ -14,6 +18,9 @@ int main()
 		                                  SDL_WINDOWPOS_UNDEFINED,
 		                                  640, 480,
 		                                  SDL_WINDOW_SHOWN);
+		                                  
+	SDL_SetWindowFullscreen(window, SDL_WINDOW_FULLSCREEN_DESKTOP);
+		                                
 	if (!window) {
 		printf("Failed to create SDL window: %s\n", SDL_GetError());
 		return 1;
@@ -30,16 +37,16 @@ int main()
 	int frame = 0;
 	
 	
-	int y[6] =  {
-		960 / 6 * 1,
-		960 / 6 * 2,
-		960 / 6 * 3,
-		960 / 6 * 4 % 480,
-		960 / 6 * 5 % 480,
-		960 / 6 * 6 % 480,
+	int lineY[6] =  {
+		WINDOW_Y / 3 * 1,
+		WINDOW_Y / 3 * 2,
+		WINDOW_Y / 3 * 3,
+		WINDOW_Y / 3 * 4 % WINDOW_Y,
+		WINDOW_Y / 3 * 5 % WINDOW_Y,
+		WINDOW_Y / 6 * 6 % WINDOW_Y,
 	};
-	int yChange[6] = {1, 1, 1, -1, -1, -1};
-	int color[6][3] = {
+	int lineYChange[6] = {1, 1, 1, -1, -1, -1};
+	int lineColor[6][3] = {
 		{255, 0, 0},
 		{255, 255, 0},
 		{0, 255, 0},
@@ -48,28 +55,53 @@ int main()
 		{255, 0, 255},
 	};
 	
+	//Turret preparation
+    SDL_Surface *images[16];
+    for(int i = 0; i < 16; i++)
+    {
+    	char spritelocation[] = "sprites/0001.png";
+    	spritelocation[10] = 48 + (i+ 1)/10; //to ascii number
+    	spritelocation[11] = 48 + ((i+ 1)%10); //to ascii number
+    	printf("sprite%i: %s\n", i, spritelocation);
+    	images[i]= IMG_Load(spritelocation);
+    }
+
+	
 	while(1)
 	{
 		clock_t FrameStartClock = clock();
-		SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255); // set color to black
+		SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255); // set lineColor to black
 		SDL_RenderClear(renderer); //erase
 		
 		for(int i = 0; i < 6; i++)
 		{
-			y[i] += yChange[i];
-			if(y[i] >= 480)
+			lineY[i] += lineYChange[i];
+			if(lineY[i] >= WINDOW_Y)
 			{
-				yChange[i] = -1;
+				lineYChange[i] = -1;
 			}
-			if(y[i] <= 0)
+			if(lineY[i] <= 0)
 			{
-				yChange[i] = 1;
+				lineYChange[i] = 1;
 			}
 			
-			SDL_SetRenderDrawColor(renderer, color[i][0], color[i][1], color[i][2], 255); // set color to red
-			SDL_RenderDrawLine(renderer, 0, y[i], 640, 480-y[i]);     // draw a diagonal line
+			SDL_SetRenderDrawColor(renderer, lineColor[i][0], lineColor[i][1], lineColor[i][2], 255); // set lineColor to red
+			SDL_RenderDrawLine(renderer, 0, lineY[i], WINDOW_X, WINDOW_Y-lineY[i]);     // draw a diagonal line
 		}
 
+		//Turret
+		for(int x = 0; x < 2; x++)
+		{
+			for(int y = 0; y < 2; y++)
+			{
+				int animFrame = ((frame%64/4) + (4*(x+y*2))) % 16;
+				printf("animFrame: %i\n", animFrame);
+				SDL_Texture *texture = SDL_CreateTextureFromSurface(renderer, images[animFrame]);
+				SDL_Rect dstrect = { (WINDOW_X-256)*x, (WINDOW_Y-256)*y, 256, 256 };
+				SDL_RenderCopy(renderer, texture, NULL, &dstrect);
+			}
+		}
+		
 		SDL_RenderPresent(renderer);
 
 		SDL_Event event;
