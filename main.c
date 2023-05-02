@@ -62,7 +62,6 @@ int main()
     	char spritelocation[] = "sprites/0001.png";
     	spritelocation[10] = 48 + (i+ 1)/10; //to ascii number
     	spritelocation[11] = 48 + ((i+ 1)%10); //to ascii number
-    	printf("sprite%i: %s\n", i, spritelocation);
     	images[i]= IMG_Load(spritelocation);
     }
 
@@ -95,7 +94,6 @@ int main()
 			for(int y = 0; y < 2; y++)
 			{
 				int animFrame = ((frame%64/4) + (4*(x+y*2))) % 16;
-				printf("animFrame: %i\n", animFrame);
 				SDL_Texture *texture = SDL_CreateTextureFromSurface(renderer, images[animFrame]);
 				SDL_Rect dstrect = { (WINDOW_X-256)*x, (WINDOW_Y-256)*y, 256, 256 };
 				SDL_RenderCopy(renderer, texture, NULL, &dstrect);
@@ -130,7 +128,15 @@ int main()
 		//Sleep until we have taken up enough time.
 		int ClocksThisFrame = clock()-FrameStartClock;
 		int ClocksToSleep = ClocksPerFrame - ClocksThisFrame;
-		usleep(((double)ClocksToSleep) / ClocksPerFrame / FrameRate * 1000000);
+		if(ClocksToSleep > 0)
+		{
+			usleep((int)(((double)ClocksToSleep) / ClocksPerFrame / FrameRate * 1000000));
+		}
+		else
+		{
+			printf("FRAME TOO LONG!");
+		}
+		//usleep(((double)ClocksToSleep) / ClocksPerFrame / FrameRate * 1000000);
 		
 		frame++;
 	}
