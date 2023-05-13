@@ -3,8 +3,23 @@
 #include <time.h>
 #include <unistd.h>
 
-#define WINDOW_X (1366)
-#define WINDOW_Y (768)
+#define WINDOW_X (3840)
+#define WINDOW_Y (2160)
+#define SPRITE_ORIENTATIONS (16)
+
+struct Vector2
+{
+	float x;
+	float y;
+};
+
+struct Object
+{
+	struct Vector2 pos;
+	struct Vector2 vel;
+	int spriteSize;
+	SDL_Surface* spriteSheet;
+};
 
 int main()
 {
@@ -16,7 +31,7 @@ int main()
 	SDL_Window *window = SDL_CreateWindow("My SDL2 Window",
 		                                  SDL_WINDOWPOS_UNDEFINED,
 		                                  SDL_WINDOWPOS_UNDEFINED,
-		                                  640, 480,
+		                                  WINDOW_X, WINDOW_Y,
 		                                  SDL_WINDOW_SHOWN);
 		                                  
 	SDL_SetWindowFullscreen(window, SDL_WINDOW_FULLSCREEN_DESKTOP);
@@ -36,7 +51,7 @@ int main()
 	int ClocksPerFrame = CLOCKS_PER_SEC / FrameRate;
 	int frame = 0;
 	
-	//Monkey head preparation
+	//Test monkey heads preparation
     SDL_Surface *images[16];
     for(int i = 0; i < 16; i++)
     {
@@ -45,6 +60,15 @@ int main()
     	spritelocation[18] = 48 + ((i+ 1)%10); //to ascii number
     	images[i]= IMG_Load(spritelocation);
     }
+
+	//TEST OBJECT
+	struct Object testObject;
+	testObject.pos.x = WINDOW_X/2;
+	testObject.pos.y = WINDOW_Y/2;
+	testObject.vel.x = 5;
+	testObject.vel.y = 0;
+	testObject.spriteSize = 128;
+	testObject.spriteSheet = IMG_Load("sprites/test_object/spritesheet.png");
 
 	
 	while(1)
@@ -64,7 +88,31 @@ int main()
 				SDL_RenderCopy(renderer, texture, NULL, &dstrect);
 			}
 		}
-		
+
+		//TEST OBJECT
+		int rotFrame = ((frame%64/4)) % SPRITE_ORIENTATIONS;
+		int animFrame = frame%120-60;
+		if(animFrame < 0)
+		{
+			animFrame *= -1;
+		}
+		testObject.pos.x += testObject.vel.x;
+		testObject.pos.y += testObject.vel.y;
+		SDL_Surface *img = SDL_CreateRGBSurface(0, testObject.spriteSize, testObject.spriteSize, 32, 0, 0, 0, 0);
+		SDL_Rect srcrect = { rotFrame*testObject.spriteSize, animFrame*testObject.spriteSize, 128, 128 };
+		SDL_Rect dstrect = { 0, 0, 0, 0 };
+		SDL_BlitSurface(testObject.spriteSheet, &srcrect, img, &dstrect);
+		SDL_Texture *texture = SDL_CreateTextureFromSurface(renderer, img);
+		dstrect.x = testObject.pos.x;
+		dstrect.y = testObject.pos.y;
+		dstrect.w = 256;
+		dstrect.h = 256;
+		SDL_RenderCopy(renderer, texture, NULL, &dstrect);
+		if(testObject.pos.x >= (WINDOW_X - 256) || testObject.pos.x <= 0)
+		{
+			testObject.vel.x *= -1;
+		}
+
 		SDL_RenderPresent(renderer);
 
 		SDL_Event event;
