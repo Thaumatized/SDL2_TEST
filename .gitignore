@@ -1,5 +1,5 @@
 #blender stuff
-.blend1
+*.blend1
 
 #compiled stuff
 bin/
