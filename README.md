@@ -7,4 +7,4 @@ sudo apt install libsdl2-image-dev;
 compile && run:
 gcc main.c -o laser-tank `sdl2-config --cflags --libs` -lSDL2_image; ./laser-tank
 or with make
-make; ./laser-tank
+make; ./bin/laser-tank
