@@ -55,7 +55,7 @@ int main()
 		{255, 0, 255},
 	};
 	
-	//Turret preparation
+	//Monkey head preparation
     SDL_Surface *images[16];
     for(int i = 0; i < 16; i++)
     {
@@ -88,7 +88,7 @@ int main()
 			SDL_RenderDrawLine(renderer, 0, lineY[i], WINDOW_X, WINDOW_Y-lineY[i]);     // draw a diagonal line
 		}
 
-		//Turret
+		//Rotating monkey heads
 		for(int x = 0; x < 2; x++)
 		{
 			for(int y = 0; y < 2; y++)
@@ -136,7 +136,6 @@ int main()
 		{
 			printf("FRAME TOO LONG!");
 		}
-		//usleep(((double)ClocksToSleep) / ClocksPerFrame / FrameRate * 1000000);
 		
 		frame++;
 	}
