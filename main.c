@@ -36,32 +36,13 @@ int main()
 	int ClocksPerFrame = CLOCKS_PER_SEC / FrameRate;
 	int frame = 0;
 	
-	
-	int lineY[6] =  {
-		WINDOW_Y / 3 * 1,
-		WINDOW_Y / 3 * 2,
-		WINDOW_Y / 3 * 3,
-		WINDOW_Y / 3 * 4 % WINDOW_Y,
-		WINDOW_Y / 3 * 5 % WINDOW_Y,
-		WINDOW_Y / 6 * 6 % WINDOW_Y,
-	};
-	int lineYChange[6] = {1, 1, 1, -1, -1, -1};
-	int lineColor[6][3] = {
-		{255, 0, 0},
-		{255, 255, 0},
-		{0, 255, 0},
-		{0, 255, 255},
-		{0, 0, 255},
-		{255, 0, 255},
-	};
-	
 	//Monkey head preparation
     SDL_Surface *images[16];
     for(int i = 0; i < 16; i++)
     {
-    	char spritelocation[] = "sprites/0001.png";
-    	spritelocation[10] = 48 + (i+ 1)/10; //to ascii number
-    	spritelocation[11] = 48 + ((i+ 1)%10); //to ascii number
+    	char spritelocation[] = "sprites/monkey/0001.png";
+    	spritelocation[17] = 48 + (i+ 1)/10; //to ascii number
+    	spritelocation[18] = 48 + ((i+ 1)%10); //to ascii number
     	images[i]= IMG_Load(spritelocation);
     }
 
@@ -69,24 +50,8 @@ int main()
 	while(1)
 	{
 		clock_t FrameStartClock = clock();
-		SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255); // set lineColor to black
+		SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
 		SDL_RenderClear(renderer); //erase
-		
-		for(int i = 0; i < 6; i++)
-		{
-			lineY[i] += lineYChange[i];
-			if(lineY[i] >= WINDOW_Y)
-			{
-				lineYChange[i] = -1;
-			}
-			if(lineY[i] <= 0)
-			{
-				lineYChange[i] = 1;
-			}
-			
-			SDL_SetRenderDrawColor(renderer, lineColor[i][0], lineColor[i][1], lineColor[i][2], 255); // set lineColor to red
-			SDL_RenderDrawLine(renderer, 0, lineY[i], WINDOW_X, WINDOW_Y-lineY[i]);     // draw a diagonal line
-		}
 
 		//Rotating monkey heads
 		for(int x = 0; x < 2; x++)
