@@ -5,7 +5,7 @@
 
 #define WINDOW_X (3840)
 #define WINDOW_Y (2160)
-#define SPRITE_ORIENTATIONS (16)
+#define SPRITE_ORIENTATIONS (72)
 
 struct Vector2
 {
@@ -17,9 +17,12 @@ struct Object
 {
 	struct Vector2 pos;
 	struct Vector2 vel;
+	float rot;
 	int spriteSize;
 	SDL_Surface* spriteSheet;
 };
+
+int rotToFrame(float rot) { return (int)(rot  / (360.0 / (float)SPRITE_ORIENTATIONS) + 0.5) % SPRITE_ORIENTATIONS; }
 
 int main()
 {
@@ -52,8 +55,8 @@ int main()
 	int frame = 0;
 	
 	//Test monkey heads preparation
-    SDL_Surface *images[16];
-    for(int i = 0; i < 16; i++)
+    SDL_Surface *images[SPRITE_ORIENTATIONS];
+    for(int i = 0; i < SPRITE_ORIENTATIONS; i++)
     {
     	char spritelocation[] = "sprites/monkey/0001.png";
     	spritelocation[17] = 48 + (i+ 1)/10; //to ascii number
@@ -67,6 +70,7 @@ int main()
 	testObject.pos.y = WINDOW_Y/2;
 	testObject.vel.x = 5;
 	testObject.vel.y = 0;
+	testObject.rot = 0;
 	testObject.spriteSize = 128;
 	testObject.spriteSheet = IMG_Load("sprites/test_object/spritesheet.png");
 
@@ -82,7 +86,7 @@ int main()
 		{
 			for(int y = 0; y < 2; y++)
 			{
-				int animFrame = ((frame%64/4) + (4*(x+y*2))) % 16;
+				int animFrame = ((frame%(SPRITE_ORIENTATIONS*4)/4) + (SPRITE_ORIENTATIONS/4*(x+y*2))) % SPRITE_ORIENTATIONS;
 				SDL_Texture *texture = SDL_CreateTextureFromSurface(renderer, images[animFrame]);
 				SDL_Rect dstrect = { (WINDOW_X-256)*x, (WINDOW_Y-256)*y, 256, 256 };
 				SDL_RenderCopy(renderer, texture, NULL, &dstrect);
@@ -90,8 +94,10 @@ int main()
 		}
 
 		//TEST OBJECT
-		int rotFrame = ((frame%64/4)) % SPRITE_ORIENTATIONS;
-		int animFrame = frame%120-60;
+		testObject.rot = ((int)testObject.rot + 1) % 360;
+		int rotFrame = rotToFrame(testObject.rot);
+		printf("rotf %i, rot %f ", rotFrame, testObject.rot);
+		int animFrame = frame%119-59;
 		if(animFrame < 0)
 		{
 			animFrame *= -1;

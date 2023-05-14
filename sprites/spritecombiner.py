@@ -1,14 +1,14 @@
 import os
 from PIL import Image
 
-sprite_folder = "monkey"
-output_filename = "test_object/spritesheet.png"
+sprite_folder = "sprites/monkey"
+output_filename = "sprites/test_object/spritesheet.png"
 
 # Get a list of all sprite paths in the folder
 sprite_paths = [os.path.join(sprite_folder, filename) for filename in os.listdir(sprite_folder) if filename.endswith(".png")]
 
 def spritepathsorter(path):
-    return(int(path[7:7+4]))
+    return(int(path[15:15+4]))
 
 sprite_paths.sort(key=spritepathsorter)
 
