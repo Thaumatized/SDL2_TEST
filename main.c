@@ -44,7 +44,7 @@ int main()
 		return 1;
 	}
 
-	SDL_Renderer *renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
+	SDL_Renderer *renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED || SDL_RENDERER_PRESENTVSYNC);
 	if (!renderer) {
 		printf("Failed to create SDL renderer: %s\n", SDL_GetError());
 		return 1;
@@ -64,6 +64,9 @@ int main()
     	images[i]= IMG_Load(spritelocation);
     }
 
+	SDL_Surface *shadowImage = IMG_Load("sprites/test_object/shadow.png");
+	SDL_Texture *shadowTexture = SDL_CreateTextureFromSurface(renderer, shadowImage);
+
 	//TEST OBJECT
 	struct Object testObject;
 	testObject.pos.x = WINDOW_X/2;
@@ -74,11 +77,15 @@ int main()
 	testObject.spriteSize = 128;
 	testObject.spriteSheet = IMG_Load("sprites/test_object/spritesheet.png");
 
+	float rot = 0;
+	int A = 0;
+	int D = 0;
+
 	
 	while(1)
 	{
 		clock_t FrameStartClock = clock();
-		SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
+		SDL_SetRenderDrawColor(renderer, 153, 138, 78, 255);
 		SDL_RenderClear(renderer); //erase
 
 		//Rotating monkey heads
@@ -94,9 +101,10 @@ int main()
 		}
 
 		//TEST OBJECT
-		testObject.rot = ((int)testObject.rot + 1) % 360;
+		testObject.rot = (testObject.rot + rot);
+		if(rot < 0) rot += 360;
+		if(rot > 360) rot -= 360;
 		int rotFrame = rotToFrame(testObject.rot);
-		printf("rotf %i, rot %f ", rotFrame, testObject.rot);
 		int animFrame = frame%119-59;
 		if(animFrame < 0)
 		{
@@ -104,11 +112,12 @@ int main()
 		}
 		testObject.pos.x += testObject.vel.x;
 		testObject.pos.y += testObject.vel.y;
-		SDL_Surface *img = SDL_CreateRGBSurface(0, testObject.spriteSize, testObject.spriteSize, 32, 0, 0, 0, 0);
+		SDL_Surface *img = SDL_CreateRGBSurface(0, testObject.spriteSize, testObject.spriteSize, 32, 0xFF000000, 0x00FF0000, 0x0000FF00, 0x000000FF);
 		SDL_Rect srcrect = { rotFrame*testObject.spriteSize, animFrame*testObject.spriteSize, 128, 128 };
 		SDL_Rect dstrect = { 0, 0, 0, 0 };
 		SDL_BlitSurface(testObject.spriteSheet, &srcrect, img, &dstrect);
 		SDL_Texture *texture = SDL_CreateTextureFromSurface(renderer, img);
+		SDL_SetTextureBlendMode(texture, SDL_BLENDMODE_BLEND);
 		dstrect.x = testObject.pos.x;
 		dstrect.y = testObject.pos.y;
 		dstrect.w = 256;
@@ -128,7 +137,28 @@ int main()
 				case SDL_QUIT:
 				    quit = 1;
 				    break;
-				// handle other events...
+				case SDL_KEYDOWN:
+					if(!strcmp(SDL_GetKeyName(event.key.keysym.sym), "A"))
+					{
+						A = -6;
+					}
+					else if(!strcmp(SDL_GetKeyName(event.key.keysym.sym), "D"))
+					{
+						D = 6;
+					}
+					rot = A + D;
+					break;
+				case SDL_KEYUP:
+					if(!strcmp(SDL_GetKeyName(event.key.keysym.sym), "A"))
+					{
+						A = 0;
+					}
+					if(!strcmp(SDL_GetKeyName(event.key.keysym.sym), "D"))
+					{
+						D = 0;
+					}
+					rot = A + D;
+				    break;
 			}
 			
 			if(quit)
@@ -142,7 +172,7 @@ int main()
 			break;
 		}
 		
-		printf("frame: %i\n", frame);
+		//printf("frame: %i\n", frame);
 		
 		//Sleep until we have taken up enough time.
 		int ClocksThisFrame = clock()-FrameStartClock;
@@ -153,7 +183,7 @@ int main()
 		}
 		else
 		{
-			printf("FRAME TOO LONG!");
+			printf("LAG FRAME!\n");
 		}
 		
 		frame++;
