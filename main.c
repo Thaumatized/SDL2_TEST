@@ -7,6 +7,13 @@
 #define WINDOW_Y (2160)
 #define SPRITE_ORIENTATIONS (72)
 
+float degsin(float deg) {return 57.2957795*sin(deg*0.0174532925)}
+float degcos(float deg) {return 57.2957795*cos(deg*0.0174532925)}
+float degtan(float deg) {return 57.2957795*tan(deg*0.0174532925)}
+float degasin(float deg) {return 57.2957795*asin(deg*0.0174532925)}
+float degacos(float deg) {return 57.2957795*acos(deg*0.0174532925)}
+float degatan(float deg) {return 57.2957795*atan(deg*0.0174532925)}
+
 struct Vector2
 {
 	float x;
