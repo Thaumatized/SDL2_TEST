@@ -7,6 +7,7 @@
 #define WINDOW_X (3840)
 #define WINDOW_Y (2160)
 #define SPRITE_ORIENTATIONS (72)
+#define MAX_FILE_PATH (1024)
 
 float degsin(float deg) {return 57.2957795*sin(deg*0.0174532925);}
 float degcos(float deg) {return 57.2957795*cos(deg*0.0174532925);}
@@ -15,6 +16,21 @@ float degasin(float deg) {return 57.2957795*asin(deg*0.0174532925);}
 float degacos(float deg) {return 57.2957795*acos(deg*0.0174532925);}
 float degatan(float deg) {return 57.2957795*atan(deg*0.0174532925);}
 
+
+void getPathToExecutable(char* buf, int bufLen)
+{
+	readlink("/proc/self/exe", buf, bufLen); //Linux.
+	//GetModuleFileName(NULL, buf, bufLen) //Windows?
+
+	for(int i = bufLen - 1; i >= 0; i--)
+	{
+		if(buf[i] == '/')
+		{
+			break;
+		}
+		buf[i] = 0;
+	}
+}
 
 struct Vector2
 {
@@ -35,7 +51,11 @@ int rotToFrame(float rot) { return (int)(rot  / (360.0 / (float)SPRITE_ORIENTATI
 
 int main()
 {
-	sin(0.7*0.0174532925);
+	char pathToExecutable[MAX_FILE_PATH];
+	memset(pathToExecutable, 0, MAX_FILE_PATH);
+	getPathToExecutable(pathToExecutable, MAX_FILE_PATH-1);
+	char path[MAX_FILE_PATH];
+	memset(path, 0, MAX_FILE_PATH);
 
 	if (SDL_Init(SDL_INIT_VIDEO) < 0) {
 		printf("Failed to initialize SDL: %s\n", SDL_GetError());
@@ -75,7 +95,10 @@ int main()
     	images[i]= IMG_Load(spritelocation);
     }
 
-	SDL_Surface *shadowImage = IMG_Load("sprites/test_object/shadow.png");
+	memset(path, 0, MAX_FILE_PATH);
+	strcat(path, pathToExecutable);
+	strcat(path, "sprites/shadow.png");
+	SDL_Surface *shadowImage = IMG_Load(path);
 	SDL_Texture *shadowTexture = SDL_CreateTextureFromSurface(renderer, shadowImage);
 
 	//TEST OBJECT
@@ -86,7 +109,23 @@ int main()
 	testObject.vel.y = 0;
 	testObject.rot = 0;
 	testObject.spriteSize = 128;
-	testObject.spriteSheet = IMG_Load("sprites/test_object/spritesheet.png");
+	memset(path, 0, MAX_FILE_PATH);
+	strcat(path, pathToExecutable);
+	strcat(path, "sprites/monkeysheet.png");
+	testObject.spriteSheet = IMG_Load(path);
+
+
+	struct Object monkeyHeads[4];
+	for(int i = 0; i < 4; i++)
+	{
+		monkeyHeads[i].pos.x = (WINDOW_X-256) * (i % 2);
+		monkeyHeads[i].pos.y = (WINDOW_Y-256) * (i / 2);;
+		monkeyHeads[i].vel.x = 0;
+		monkeyHeads[i].vel.y = 0;
+		monkeyHeads[i].rot = 0;
+		monkeyHeads[i].spriteSize = 128;
+		monkeyHeads[i].spriteSheet = testObject.spriteSheet;
+	}
 
 	float rot = 0;
 	int A = 0;
@@ -99,24 +138,46 @@ int main()
 		SDL_SetRenderDrawColor(renderer, 153, 138, 78, 255);
 		SDL_RenderClear(renderer); //erase
 
+		SDL_Texture *texture;
+		int animFrame = 0;
+		int rotFrame = 0;
+
 		//Rotating monkey heads
-		for(int x = 0; x < 2; x++)
+		for(int i = 0; i < 4; i++)
 		{
-			for(int y = 0; y < 2; y++)
+			//int animFrame = ((frame%(SPRITE_ORIENTATIONS*4)/4) + (SPRITE_ORIENTATIONS/4*(x+y*2))) % SPRITE_ORIENTATIONS;
+			//SDL_Texture *texture = SDL_CreateTextureFromSurface(renderer, images[animFrame]);
+			//SDL_Rect dstrect = { (WINDOW_X-256)*x, (WINDOW_Y-256)*y, 256, 256 };
+			
+
+			monkeyHeads[i].rot = (monkeyHeads[i].rot + 1);
+			if(monkeyHeads[i].rot < 0) monkeyHeads[i].rot += 360;
+			if(monkeyHeads[i].rot > 360) monkeyHeads[i].rot -= 360;
+			rotFrame = rotToFrame(monkeyHeads[i].rot);
+			animFrame = (frame+(30*i))%119-59;
+			if(animFrame < 0)
 			{
-				int animFrame = ((frame%(SPRITE_ORIENTATIONS*4)/4) + (SPRITE_ORIENTATIONS/4*(x+y*2))) % SPRITE_ORIENTATIONS;
-				SDL_Texture *texture = SDL_CreateTextureFromSurface(renderer, images[animFrame]);
-				SDL_Rect dstrect = { (WINDOW_X-256)*x, (WINDOW_Y-256)*y, 256, 256 };
-				SDL_RenderCopy(renderer, texture, NULL, &dstrect);
+				animFrame *= -1;
 			}
+			SDL_Surface *img = SDL_CreateRGBSurface(0, monkeyHeads[i].spriteSize, monkeyHeads[i].spriteSize, 32, 0xFF000000, 0x00FF0000, 0x0000FF00, 0x000000FF);
+			SDL_Rect srcrect = { rotFrame*monkeyHeads[i].spriteSize, animFrame*monkeyHeads[i].spriteSize, 128, 128 };
+			SDL_Rect dstrect = { 0, 0, 0, 0 };
+			SDL_BlitSurface(monkeyHeads[i].spriteSheet, &srcrect, img, &dstrect);
+			texture = SDL_CreateTextureFromSurface(renderer, img);
+			SDL_SetTextureBlendMode(texture, SDL_BLENDMODE_BLEND);
+			dstrect.x = monkeyHeads[i].pos.x;
+			dstrect.y = monkeyHeads[i].pos.y;
+			dstrect.w = 256;
+			dstrect.h = 256;
+			SDL_RenderCopy(renderer, texture, NULL, &dstrect);
 		}
 
 		//TEST OBJECT
 		testObject.rot = (testObject.rot + rot);
-		if(rot < 0) rot += 360;
-		if(rot > 360) rot -= 360;
-		int rotFrame = rotToFrame(testObject.rot);
-		int animFrame = frame%119-59;
+		if(testObject.rot < 0) testObject.rot += 360;
+		if(testObject.rot > 360) testObject.rot -= 360;
+		rotFrame = rotToFrame(testObject.rot);
+		animFrame = frame%119-59;
 		if(animFrame < 0)
 		{
 			animFrame *= -1;
@@ -127,7 +188,7 @@ int main()
 		SDL_Rect srcrect = { rotFrame*testObject.spriteSize, animFrame*testObject.spriteSize, 128, 128 };
 		SDL_Rect dstrect = { 0, 0, 0, 0 };
 		SDL_BlitSurface(testObject.spriteSheet, &srcrect, img, &dstrect);
-		SDL_Texture *texture = SDL_CreateTextureFromSurface(renderer, img);
+		texture = SDL_CreateTextureFromSurface(renderer, img);
 		SDL_SetTextureBlendMode(texture, SDL_BLENDMODE_BLEND);
 		//SHADOW
 		dstrect.x = testObject.pos.x + 64;
@@ -135,10 +196,6 @@ int main()
 		dstrect.w = 128;
 		dstrect.h = 64;
 		SDL_RenderCopy(renderer, shadowTexture, NULL, &dstrect);
-		if(testObject.pos.x >= (WINDOW_X - 256) || testObject.pos.x <= 0)
-		{
-			testObject.vel.x *= -1;
-		}
 		//SHADOW
 		dstrect.x = testObject.pos.x;
 		dstrect.y = testObject.pos.y;
