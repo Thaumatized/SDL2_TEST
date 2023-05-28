@@ -1,6 +1,6 @@
 from PIL import Image
 
-output_filename = "sprites/test_object/shadow.png"
+output_filename = "test_object/shadow.png"
 
 image = Image.new("RGBA", (64, 32))
 
