@@ -3,3 +3,6 @@
 
 #compiled stuff
 bin/
+
+#vscode
+.vscode/

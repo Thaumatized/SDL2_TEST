@@ -129,6 +129,17 @@ int main()
 		SDL_BlitSurface(testObject.spriteSheet, &srcrect, img, &dstrect);
 		SDL_Texture *texture = SDL_CreateTextureFromSurface(renderer, img);
 		SDL_SetTextureBlendMode(texture, SDL_BLENDMODE_BLEND);
+		//SHADOW
+		dstrect.x = testObject.pos.x + 64;
+		dstrect.y = testObject.pos.y + 128 + 64;
+		dstrect.w = 128;
+		dstrect.h = 64;
+		SDL_RenderCopy(renderer, shadowTexture, NULL, &dstrect);
+		if(testObject.pos.x >= (WINDOW_X - 256) || testObject.pos.x <= 0)
+		{
+			testObject.vel.x *= -1;
+		}
+		//SHADOW
 		dstrect.x = testObject.pos.x;
 		dstrect.y = testObject.pos.y;
 		dstrect.w = 256;
