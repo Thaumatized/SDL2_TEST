@@ -2,17 +2,19 @@
 #include <SDL2/SDL_image.h>
 #include <time.h>
 #include <unistd.h>
+#include <math.h>
 
 #define WINDOW_X (3840)
 #define WINDOW_Y (2160)
 #define SPRITE_ORIENTATIONS (72)
 
-float degsin(float deg) {return 57.2957795*sin(deg*0.0174532925)}
-float degcos(float deg) {return 57.2957795*cos(deg*0.0174532925)}
-float degtan(float deg) {return 57.2957795*tan(deg*0.0174532925)}
-float degasin(float deg) {return 57.2957795*asin(deg*0.0174532925)}
-float degacos(float deg) {return 57.2957795*acos(deg*0.0174532925)}
-float degatan(float deg) {return 57.2957795*atan(deg*0.0174532925)}
+float degsin(float deg) {return 57.2957795*sin(deg*0.0174532925);}
+float degcos(float deg) {return 57.2957795*cos(deg*0.0174532925);}
+float degtan(float deg) {return 57.2957795*tan(deg*0.0174532925);}
+float degasin(float deg) {return 57.2957795*asin(deg*0.0174532925);}
+float degacos(float deg) {return 57.2957795*acos(deg*0.0174532925);}
+float degatan(float deg) {return 57.2957795*atan(deg*0.0174532925);}
+
 
 struct Vector2
 {
@@ -33,6 +35,8 @@ int rotToFrame(float rot) { return (int)(rot  / (360.0 / (float)SPRITE_ORIENTATI
 
 int main()
 {
+	sin(0.7*0.0174532925);
+
 	if (SDL_Init(SDL_INIT_VIDEO) < 0) {
 		printf("Failed to initialize SDL: %s\n", SDL_GetError());
 		return 1;
