@@ -177,11 +177,19 @@ int main()
 		if(testObject.rot < 0) testObject.rot += 360;
 		if(testObject.rot > 360) testObject.rot -= 360;
 		rotFrame = rotToFrame(testObject.rot);
+		/*
+		//This would cause the monkey head to float up and down.
+		//I find this undesirable for the playercontrolled one.
+		//This will be replaced with advanced logic once the controlled object is an actual tank.
+		//Kept this for reference.
 		animFrame = frame%119-59;
 		if(animFrame < 0)
 		{
 			animFrame *= -1;
 		}
+		*/
+		animFrame = 59;
+		
 		testObject.pos.x += testObject.vel.x;
 		testObject.pos.y += testObject.vel.y;
 		SDL_Surface *img = SDL_CreateRGBSurface(0, testObject.spriteSize, testObject.spriteSize, 32, 0xFF000000, 0x00FF0000, 0x0000FF00, 0x000000FF);
@@ -196,7 +204,7 @@ int main()
 		dstrect.w = 128;
 		dstrect.h = 64;
 		SDL_RenderCopy(renderer, shadowTexture, NULL, &dstrect);
-		//SHADOW
+		//Object it self
 		dstrect.x = testObject.pos.x;
 		dstrect.y = testObject.pos.y;
 		dstrect.w = 256;
