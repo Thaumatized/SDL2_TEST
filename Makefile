@@ -12,7 +12,7 @@ bin/laser-tank: main.c
 bin/sprites: bin/sprites/monkeysheet.png bin/sprites/shadow.png
 	@echo "Sprites done"
 
-bin/sprites/monkeysheet.png: sprites/spritecombiner.py
+bin/sprites/monkeysheet.png: sprites/spritecombiner.py sprites/monkey/*
 	@echo "Making spriteheet"
 	@python3 sprites/spritecombiner.py;
 	
