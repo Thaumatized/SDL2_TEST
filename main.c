@@ -210,9 +210,21 @@ int main()
 		dstrect.w = 256;
 		dstrect.h = 256;
 		SDL_RenderCopy(renderer, texture, NULL, &dstrect);
-		if(testObject.pos.x >= (WINDOW_X - 256) || testObject.pos.x <= 0)
+		if(testObject.pos.x > WINDOW_X)
 		{
-			testObject.vel.x *= -1;
+			testObject.pos.x -= WINDOW_X + 256;
+		}
+		if(testObject.pos.x < 0 - 256)
+		{
+			testObject.pos.x += WINDOW_X + 256;
+		}
+		if(testObject.pos.y > WINDOW_Y)
+		{
+			testObject.pos.y -= WINDOW_Y + 256;
+		}
+		if(testObject.pos.y < 0 - 256)
+		{
+			testObject.pos.y += WINDOW_Y + 256;
 		}
 
 		SDL_RenderPresent(renderer);
