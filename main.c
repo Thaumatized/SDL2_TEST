@@ -9,12 +9,12 @@
 #define SPRITE_ORIENTATIONS (72)
 #define MAX_FILE_PATH (1024)
 
-float degsin(float deg) {return 57.2957795*sin(deg*0.0174532925);}
-float degcos(float deg) {return 57.2957795*cos(deg*0.0174532925);}
-float degtan(float deg) {return 57.2957795*tan(deg*0.0174532925);}
-float degasin(float deg) {return 57.2957795*asin(deg*0.0174532925);}
-float degacos(float deg) {return 57.2957795*acos(deg*0.0174532925);}
-float degatan(float deg) {return 57.2957795*atan(deg*0.0174532925);}
+float degsin(float deg) {return sin(deg*0.0174532925);}
+float degcos(float deg) {return cos(deg*0.0174532925);}
+float degtan(float deg) {return tan(deg*0.0174532925);}
+float degasin(float val) {return 57.2957795*asin(val);}
+float degacos(float val) {return 57.2957795*acos(val);}
+float degatan(float val) {return 57.2957795*atan(val);}
 
 
 void getPathToExecutable(char* buf, int bufLen)
@@ -48,6 +48,27 @@ struct Object
 } typedef Object;
 
 int rotToFrame(float rot) { return (int)(rot  / (360.0 / (float)SPRITE_ORIENTATIONS) + 0.5) % SPRITE_ORIENTATIONS; }
+
+Vector2 rotToVector2(float rot)
+{
+	int ySing = 1 - (rot > 90 || rot < 270)*2;
+
+	Vector2 result = {
+		degsin(rot),
+		degcos(rot)*ySing
+	};
+	return result;
+}
+
+Vector2 multiplyVector2(Vector2 vector, float multiplier)
+{
+	Vector2 result = {
+		vector.x * multiplier,
+		vector.y * multiplier
+	};
+
+	return result;
+}
 
 int main()
 {
@@ -105,7 +126,7 @@ int main()
 	Object testObject;
 	testObject.pos.x = WINDOW_X/2;
 	testObject.pos.y = WINDOW_Y/2;
-	testObject.vel.x = 5;
+	testObject.vel.x = 0;
 	testObject.vel.y = 0;
 	testObject.rot = 0;
 	testObject.spriteSize = 128;
@@ -191,6 +212,8 @@ int main()
 		}
 		*/
 		animFrame = 59;
+
+		testObject.vel = multiplyVector2(rotToVector2(testObject.rot), (-S+W)*15);
 		
 		testObject.pos.x += testObject.vel.x;
 		testObject.pos.y += testObject.vel.y;
@@ -247,11 +270,11 @@ int main()
 					{
 						D = 1;
 					}
-					if(!strcmp(SDL_GetKeyName(event.key.keysym.sym), "A"))
+					if(!strcmp(SDL_GetKeyName(event.key.keysym.sym), "W"))
 					{
 						W = 1;
 					}
-					else if(!strcmp(SDL_GetKeyName(event.key.keysym.sym), "D"))
+					else if(!strcmp(SDL_GetKeyName(event.key.keysym.sym), "S"))
 					{
 						S = 1;
 					}
@@ -265,11 +288,11 @@ int main()
 					{
 						D = 0;
 					}
-					if(!strcmp(SDL_GetKeyName(event.key.keysym.sym), "A"))
+					if(!strcmp(SDL_GetKeyName(event.key.keysym.sym), "W"))
 					{
 						W = 0;
 					}
-					else if(!strcmp(SDL_GetKeyName(event.key.keysym.sym), "D"))
+					else if(!strcmp(SDL_GetKeyName(event.key.keysym.sym), "S"))
 					{
 						S = 0;
 					}
