@@ -36,16 +36,16 @@ struct Vector2
 {
 	float x;
 	float y;
-};
+} typedef Vector2;
 
 struct Object
 {
-	struct Vector2 pos;
-	struct Vector2 vel;
+	Vector2 pos;
+	Vector2 vel;
 	float rot;
 	int spriteSize;
 	SDL_Surface* spriteSheet;
-};
+} typedef Object;
 
 int rotToFrame(float rot) { return (int)(rot  / (360.0 / (float)SPRITE_ORIENTATIONS) + 0.5) % SPRITE_ORIENTATIONS; }
 
@@ -102,7 +102,7 @@ int main()
 	SDL_Texture *shadowTexture = SDL_CreateTextureFromSurface(renderer, shadowImage);
 
 	//TEST OBJECT
-	struct Object testObject;
+	Object testObject;
 	testObject.pos.x = WINDOW_X/2;
 	testObject.pos.y = WINDOW_Y/2;
 	testObject.vel.x = 5;
@@ -115,7 +115,7 @@ int main()
 	testObject.spriteSheet = IMG_Load(path);
 
 
-	struct Object monkeyHeads[4];
+	Object monkeyHeads[4];
 	for(int i = 0; i < 4; i++)
 	{
 		monkeyHeads[i].pos.x = (WINDOW_X-256) * (i % 2);
@@ -127,9 +127,11 @@ int main()
 		monkeyHeads[i].spriteSheet = testObject.spriteSheet;
 	}
 
-	float rot = 0;
+	//test object control variables
 	int A = 0;
 	int D = 0;
+	int W = 0;
+	int S = 0;
 
 	
 	while(1)
@@ -173,7 +175,7 @@ int main()
 		}
 
 		//TEST OBJECT
-		testObject.rot = (testObject.rot + rot);
+		testObject.rot += (-A + D) * 6;
 		if(testObject.rot < 0) testObject.rot += 360;
 		if(testObject.rot > 360) testObject.rot -= 360;
 		rotFrame = rotToFrame(testObject.rot);
@@ -239,13 +241,20 @@ int main()
 				case SDL_KEYDOWN:
 					if(!strcmp(SDL_GetKeyName(event.key.keysym.sym), "A"))
 					{
-						A = -6;
+						A = 1;
 					}
 					else if(!strcmp(SDL_GetKeyName(event.key.keysym.sym), "D"))
 					{
-						D = 6;
+						D = 1;
 					}
-					rot = A + D;
+					if(!strcmp(SDL_GetKeyName(event.key.keysym.sym), "A"))
+					{
+						W = 1;
+					}
+					else if(!strcmp(SDL_GetKeyName(event.key.keysym.sym), "D"))
+					{
+						S = 1;
+					}
 					break;
 				case SDL_KEYUP:
 					if(!strcmp(SDL_GetKeyName(event.key.keysym.sym), "A"))
@@ -256,7 +265,14 @@ int main()
 					{
 						D = 0;
 					}
-					rot = A + D;
+					if(!strcmp(SDL_GetKeyName(event.key.keysym.sym), "A"))
+					{
+						W = 0;
+					}
+					else if(!strcmp(SDL_GetKeyName(event.key.keysym.sym), "D"))
+					{
+						S = 0;
+					}
 				    break;
 			}
 			
