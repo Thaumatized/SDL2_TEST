@@ -11,6 +11,7 @@ image = Image.new("RGBA", (size_x, size_y))
 for x in range(size_x):
     for y in range(size_y):
         distanceFromCenter = math.sqrt(pow(abs(((size_x/2)-x)/(size_x/2)), 2) + pow(abs(((size_y/2)-y)/(size_y/2)), 2))
+        distanceFromCenter *= 0.98 # makes the shadow a bit smaller. Stops clipping at the edges.
         darkness = 255 - int(distanceFromCenter*255)
 
         if darkness < 50:
