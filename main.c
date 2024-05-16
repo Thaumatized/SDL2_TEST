@@ -4,10 +4,11 @@
 #include <unistd.h>
 #include <math.h>
 
-#define WINDOW_X (3840)
-#define WINDOW_Y (2160)
 #define SPRITE_ORIENTATIONS (72)
 #define MAX_FILE_PATH (1024)
+
+int WINDOW_X = 1280;
+int WINDOW_Y = 720;
 
 float degsin(float deg) {return sin(deg*0.0174532925);}
 float degcos(float deg) {return cos(deg*0.0174532925);}
