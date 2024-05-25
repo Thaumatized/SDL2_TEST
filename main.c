@@ -1,8 +1,20 @@
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_image.h>
 #include <time.h>
-#include <unistd.h>
+//#include <unistd.h>
 #include <math.h>
+
+//for printf
+#include <stdio.h>
+// for getPathToExecutable
+#include <libloaderapi.h>
+// for sleep
+#include <windows.h>
+
+int usleep(int microseconds)
+{
+	Sleep(microseconds / 1000);
+}
 
 #define WINDOW_X (3840)
 #define WINDOW_Y (2160)
@@ -19,8 +31,8 @@ float degatan(float val) {return 57.2957795*atan(val);}
 
 void getPathToExecutable(char* buf, int bufLen)
 {
-	readlink("/proc/self/exe", buf, bufLen); //Linux.
-	//GetModuleFileName(NULL, buf, bufLen) //Windows?
+	//readlink("/proc/self/exe", buf, bufLen); //Linux.
+	GetModuleFileName(NULL, buf, bufLen); //Windows?
 
 	for(int i = bufLen - 1; i >= 0; i--)
 	{
@@ -70,7 +82,7 @@ Vector2 multiplyVector2(Vector2 vector, float multiplier)
 	return result;
 }
 
-int main()
+int main(int argc, char* argv[])
 {
 	char pathToExecutable[MAX_FILE_PATH];
 	memset(pathToExecutable, 0, MAX_FILE_PATH);
