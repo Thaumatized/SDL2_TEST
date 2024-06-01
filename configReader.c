@@ -4,15 +4,15 @@
 
 #define MAX_LINE 256
 
-typedef enum configOutputType {
-    STRING,
-    INT
-} configOutputType;
+typedef enum configType {
+    CONFIG_STRING,
+    CONFIG_INT
+} configType;
 
 typedef struct config_fetch_options {
     char name[MAX_LINE];
     void* value_ptr;
-    configOutputType outputType;
+    configType outputType;
 } config_fetch_options;
 
 int getConfigurations(char* filename, config_fetch_options* options, int optionsCount)
@@ -80,10 +80,10 @@ int getConfigurations(char* filename, config_fetch_options* options, int options
         }
 
         switch (options[matchingOptionIndex].outputType) {
-            case STRING:
+            case CONFIG_STRING:
                 strcpy((char*)options[matchingOptionIndex].value_ptr, value);
                 break;
-            case INT:
+            case CONFIG_INT:
                 *((int*)options[matchingOptionIndex].value_ptr) = atoi(value);
                 break;
         }
@@ -100,8 +100,8 @@ void main()
     char TEST_TEXT[MAX_LINE];
     memset(TEST_TEXT, 0, MAX_LINE);
     config_fetch_options config_fetch_optionss[] = {
-        {"TEST_TEXT", &TEST_TEXT, STRING},
-        {"WINDOW_X", &x, INT},
+        {"TEST_TEXT", &TEST_TEXT, CONFIG_STRING},
+        {"WINDOW_X", &x, CONFIG_INT},
     };
     getConfigurations("config.ini", config_fetch_optionss, 2);
 
