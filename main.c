@@ -162,7 +162,6 @@ int main()
 		SDL_SetRenderDrawColor(renderer, 153, 138, 78, 255);
 		SDL_RenderClear(renderer); //erase
 
-		SDL_Texture *texture;
 		int animFrame = 0;
 		int rotFrame = 0;
 
@@ -187,13 +186,16 @@ int main()
 			SDL_Rect srcrect = { rotFrame*monkeyHeads[i].spriteSize, animFrame*monkeyHeads[i].spriteSize, 128, 128 };
 			SDL_Rect dstrect = { 0, 0, 0, 0 };
 			SDL_BlitSurface(monkeyHeads[i].spriteSheet, &srcrect, img, &dstrect);
-			texture = SDL_CreateTextureFromSurface(renderer, img);
+			SDL_Texture *texture = SDL_CreateTextureFromSurface(renderer, img);
 			SDL_SetTextureBlendMode(texture, SDL_BLENDMODE_BLEND);
 			dstrect.x = monkeyHeads[i].pos.x;
 			dstrect.y = monkeyHeads[i].pos.y;
 			dstrect.w = 256;
 			dstrect.h = 256;
 			SDL_RenderCopy(renderer, texture, NULL, &dstrect);
+
+			SDL_FreeSurface(img);
+			SDL_DestroyTexture(texture);
 		}
 
 		//TEST OBJECT
@@ -222,7 +224,7 @@ int main()
 		SDL_Rect srcrect = { rotFrame*testObject.spriteSize, animFrame*testObject.spriteSize, 128, 128 };
 		SDL_Rect dstrect = { 0, 0, 0, 0 };
 		SDL_BlitSurface(testObject.spriteSheet, &srcrect, img, &dstrect);
-		texture = SDL_CreateTextureFromSurface(renderer, img);
+		SDL_Texture *texture = SDL_CreateTextureFromSurface(renderer, img);
 		SDL_SetTextureBlendMode(texture, SDL_BLENDMODE_BLEND);
 		//SHADOW
 		dstrect.x = testObject.pos.x + 64;
@@ -253,6 +255,9 @@ int main()
 			testObject.pos.y += WINDOW_Y + 256;
 		}
 
+		SDL_FreeSurface(img);
+		SDL_DestroyTexture(texture);
+		
 		SDL_RenderPresent(renderer);
 
 		SDL_Event event;
