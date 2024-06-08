@@ -11,7 +11,7 @@
 
 int WINDOW_X = 640;
 int WINDOW_Y = 360;
-uint DISPLAY_MODE;
+int DISPLAY_MODE = 0; // 0 == windowed
 
 void getConfig(char* pathToExecutable) {
 	char path[MAX_FILE_PATH];
@@ -38,7 +38,7 @@ void getConfig(char* pathToExecutable) {
 	{
 		DISPLAY_MODE = SDL_WINDOW_FULLSCREEN_DESKTOP;
 	}
-	else
+	else if(strcmp(displayMode, "windowed") == 0)
 	{
 		DISPLAY_MODE = 0; //Windowed
 	}
