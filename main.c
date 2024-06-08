@@ -4,11 +4,27 @@
 #include <unistd.h>
 #include <math.h>
 
+#include "configReader.c"
+
 #define SPRITE_ORIENTATIONS (72)
 #define MAX_FILE_PATH (1024)
 
-int WINDOW_X = 1280;
-int WINDOW_Y = 720;
+int WINDOW_X = 640;
+int WINDOW_Y = 360;
+
+void getConfig(char* pathToExecutable) {
+	char path[MAX_FILE_PATH];
+	memset(path, 0, MAX_FILE_PATH);
+	strcat(path, pathToExecutable);
+	strcat(path, "config.ini");
+
+	config_fetch_options config_options[] = {
+		{"WINDOW_X", &WINDOW_X, CONFIG_INT},
+		{"WINDOW_Y", &WINDOW_Y, CONFIG_INT},
+	};
+
+	getConfigurations(path, config_options, 2);
+}
 
 float degsin(float deg) {return sin(deg*0.0174532925);}
 float degcos(float deg) {return cos(deg*0.0174532925);}
@@ -16,7 +32,6 @@ float degtan(float deg) {return tan(deg*0.0174532925);}
 float degasin(float val) {return 57.2957795*asin(val);}
 float degacos(float val) {return 57.2957795*acos(val);}
 float degatan(float val) {return 57.2957795*atan(val);}
-
 
 void getPathToExecutable(char* buf, int bufLen)
 {
@@ -78,6 +93,8 @@ int main()
 	getPathToExecutable(pathToExecutable, MAX_FILE_PATH-1);
 	char path[MAX_FILE_PATH];
 	memset(path, 0, MAX_FILE_PATH);
+
+	getConfig(pathToExecutable);
 
 	if (SDL_Init(SDL_INIT_VIDEO) < 0) {
 		printf("Failed to initialize SDL: %s\n", SDL_GetError());

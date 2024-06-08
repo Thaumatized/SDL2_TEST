@@ -93,17 +93,3 @@ int getConfigurations(char* filename, config_fetch_options* options, int options
 
     fclose(fp);
 }
-
-void main()
-{
-    int x = 0;
-    char TEST_TEXT[MAX_LINE];
-    memset(TEST_TEXT, 0, MAX_LINE);
-    config_fetch_options config_fetch_optionss[] = {
-        {"TEST_TEXT", &TEST_TEXT, CONFIG_STRING},
-        {"WINDOW_X", &x, CONFIG_INT},
-    };
-    getConfigurations("config.ini", config_fetch_optionss, 2);
-
-    printf("string: %s\nint: %i", TEST_TEXT, x);
-}
