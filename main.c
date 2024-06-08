@@ -4,10 +4,45 @@
 #include <unistd.h>
 #include <math.h>
 
-#define WINDOW_X (3840)
-#define WINDOW_Y (2160)
+#include "configReader.c"
+
 #define SPRITE_ORIENTATIONS (72)
 #define MAX_FILE_PATH (1024)
+
+int WINDOW_X = 640;
+int WINDOW_Y = 360;
+int DISPLAY_MODE = 0; // 0 == windowed
+
+void getConfig(char* pathToExecutable) {
+	char path[MAX_FILE_PATH];
+	memset(path, 0, MAX_FILE_PATH);
+	strcat(path, pathToExecutable);
+	strcat(path, "config.ini");
+
+	char displayMode[MAX_LINE];
+	memset(displayMode, 0, MAX_LINE);
+
+	config_fetch_options config_options[] = {
+		{"WINDOW_X", &WINDOW_X, CONFIG_INT},
+		{"WINDOW_Y", &WINDOW_Y, CONFIG_INT},
+		{"DISPLAY_MODE", displayMode, CONFIG_STRING},
+	};
+
+	getConfigurations(path, config_options, 3);
+
+	if(strcmp(displayMode, "fullscreen") == 0)
+	{
+		DISPLAY_MODE = SDL_WINDOW_FULLSCREEN;
+	}
+	else if(strcmp(displayMode, "windowed fullscreen") == 0)
+	{
+		DISPLAY_MODE = SDL_WINDOW_FULLSCREEN_DESKTOP;
+	}
+	else if(strcmp(displayMode, "windowed") == 0)
+	{
+		DISPLAY_MODE = 0; //Windowed
+	}
+}
 
 float degsin(float deg) {return sin(deg*0.0174532925);}
 float degcos(float deg) {return cos(deg*0.0174532925);}
@@ -15,7 +50,6 @@ float degtan(float deg) {return tan(deg*0.0174532925);}
 float degasin(float val) {return 57.2957795*asin(val);}
 float degacos(float val) {return 57.2957795*acos(val);}
 float degatan(float val) {return 57.2957795*atan(val);}
-
 
 void getPathToExecutable(char* buf, int bufLen)
 {
@@ -78,6 +112,8 @@ int main()
 	char path[MAX_FILE_PATH];
 	memset(path, 0, MAX_FILE_PATH);
 
+	getConfig(pathToExecutable);
+
 	if (SDL_Init(SDL_INIT_VIDEO) < 0) {
 		printf("Failed to initialize SDL: %s\n", SDL_GetError());
 		return 1;
@@ -89,7 +125,7 @@ int main()
 		                                  WINDOW_X, WINDOW_Y,
 		                                  SDL_WINDOW_SHOWN);
 		                                  
-	SDL_SetWindowFullscreen(window, SDL_WINDOW_FULLSCREEN_DESKTOP);
+	SDL_SetWindowFullscreen(window, DISPLAY_MODE);
 		                                
 	if (!window) {
 		printf("Failed to create SDL window: %s\n", SDL_GetError());
@@ -100,6 +136,12 @@ int main()
 	if (!renderer) {
 		printf("Failed to create SDL renderer: %s\n", SDL_GetError());
 		return 1;
+	}
+
+	//if windowed fullscreen resolution will be the screen resolutions and so it shouldn't be based on settings
+	if(DISPLAY_MODE == SDL_WINDOW_FULLSCREEN_DESKTOP)
+	{
+		SDL_GetWindowSize(window, &WINDOW_X, &WINDOW_Y);
 	}
 
 	int FrameRate = 60;

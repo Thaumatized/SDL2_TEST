@@ -1,13 +1,17 @@
-all: mkdir bin/laser-tank bin/sprites
+all: mkdir bin/laser-tank bin/sprites bin/config.ini
 
 .PHONY: mkdir clean
 
 mkdir:
 	@mkdir -p bin/sprites/
 
-bin/laser-tank: main.c
-	@echo "compiling game"
+bin/laser-tank: main.c configReader.c
+	@echo "Compiling game"
 	gcc main.c -o bin/laser-tank `sdl2-config --cflags --libs` -lSDL2_image -lm;
+
+bin/config.ini:
+	@echo "Copying default config"
+	cp default-config.ini bin/config.ini
 	
 bin/sprites: bin/sprites/monkeysheet.png bin/sprites/shadow.png
 	@echo "Sprites done"
