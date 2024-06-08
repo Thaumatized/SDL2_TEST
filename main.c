@@ -138,6 +138,12 @@ int main()
 		return 1;
 	}
 
+	//if windowed fullscreen resolution will be the screen resolutions and so it shouldn't be based on settings
+	if(DISPLAY_MODE == SDL_WINDOW_FULLSCREEN_DESKTOP)
+	{
+		SDL_GetWindowSize(window, &WINDOW_X, &WINDOW_Y);
+	}
+
 	int FrameRate = 60;
 	int ClocksPerFrame = CLOCKS_PER_SEC / FrameRate;
 	int frame = 0;
