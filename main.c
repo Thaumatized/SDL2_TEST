@@ -11,6 +11,7 @@
 
 int WINDOW_X = 640;
 int WINDOW_Y = 360;
+uint DISPLAY_MODE;
 
 void getConfig(char* pathToExecutable) {
 	char path[MAX_FILE_PATH];
@@ -18,12 +19,29 @@ void getConfig(char* pathToExecutable) {
 	strcat(path, pathToExecutable);
 	strcat(path, "config.ini");
 
+	char displayMode[MAX_LINE];
+	memset(displayMode, 0, MAX_LINE);
+
 	config_fetch_options config_options[] = {
 		{"WINDOW_X", &WINDOW_X, CONFIG_INT},
 		{"WINDOW_Y", &WINDOW_Y, CONFIG_INT},
+		{"DISPLAY_MODE", displayMode, CONFIG_STRING},
 	};
 
-	getConfigurations(path, config_options, 2);
+	getConfigurations(path, config_options, 3);
+
+	if(strcmp(displayMode, "fullscreen") == 0)
+	{
+		DISPLAY_MODE = SDL_WINDOW_FULLSCREEN;
+	}
+	else if(strcmp(displayMode, "windowed fullscreen") == 0)
+	{
+		DISPLAY_MODE = SDL_WINDOW_FULLSCREEN_DESKTOP;
+	}
+	else
+	{
+		DISPLAY_MODE = 0; //Windowed
+	}
 }
 
 float degsin(float deg) {return sin(deg*0.0174532925);}
@@ -107,7 +125,7 @@ int main()
 		                                  WINDOW_X, WINDOW_Y,
 		                                  SDL_WINDOW_SHOWN);
 		                                  
-	SDL_SetWindowFullscreen(window, SDL_WINDOW_FULLSCREEN_DESKTOP);
+	SDL_SetWindowFullscreen(window, DISPLAY_MODE);
 		                                
 	if (!window) {
 		printf("Failed to create SDL window: %s\n", SDL_GetError());

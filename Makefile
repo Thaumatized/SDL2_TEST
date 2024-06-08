@@ -5,7 +5,7 @@ all: mkdir bin/laser-tank bin/sprites bin/config.ini
 mkdir:
 	@mkdir -p bin/sprites/
 
-bin/laser-tank: main.c
+bin/laser-tank: main.c configReader.c
 	@echo "Compiling game"
 	gcc main.c -o bin/laser-tank `sdl2-config --cflags --libs` -lSDL2_image -lm;
 

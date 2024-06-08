@@ -6,7 +6,7 @@
 
 typedef enum configType {
     CONFIG_STRING,
-    CONFIG_INT
+    CONFIG_INT,
 } configType;
 
 typedef struct config_fetch_options {
@@ -14,6 +14,27 @@ typedef struct config_fetch_options {
     void* value_ptr;
     configType outputType;
 } config_fetch_options;
+
+int isEndCharacter(char c)
+{
+    return c == '\n' || c == '#' || c == ';';
+}
+
+void stripWhiteSpace(char* str)
+{
+    int whiteSpaceAtStart = 0;
+    while(str[whiteSpaceAtStart] == ' ') whiteSpaceAtStart++;
+    int len = strlen(str);
+    int whiteSpaceAtEnd = 0;
+    while(str[len - whiteSpaceAtEnd - 1] == ' ') whiteSpaceAtEnd++;
+
+    int newLen = len - whiteSpaceAtStart - whiteSpaceAtEnd;
+    for(int i = 0; i < newLen; i++)
+    {
+        str[i] = str[i+whiteSpaceAtStart];
+    }
+    memset(str + newLen, 0, len-newLen);
+}
 
 int getConfigurations(char* filename, config_fetch_options* options, int optionsCount)
 {
@@ -38,31 +59,35 @@ int getConfigurations(char* filename, config_fetch_options* options, int options
         memset(name, 0, MAX_LINE);
         memset(value, 0, MAX_LINE);
         int resultOffset = 0;
-        while(lineOffset < MAX_LINE && line[lineOffset] != '=')
+        int start = 1;
+        while(line[lineOffset] != '=')
         {   
-            if(line[lineOffset] == '\n')
+
+            if(isEndCharacter(line[lineOffset]))
             {
                 printf("%s line %i is missing =\n", filename, lineNumber);
                 exit(1);
             }
-            if(line[lineOffset] != ' ')
+            else
             {
                 name[resultOffset] = line[lineOffset];
                 resultOffset++;
             }
             lineOffset++;
         }
+        name[resultOffset] == '\n';
         lineOffset++;
         resultOffset = 0;
-        while(lineOffset < MAX_LINE && line[lineOffset] != '\n')
+        while(!isEndCharacter(line[lineOffset]))
         {
-            if(line[lineOffset] != ' ')
-            {
-                value[resultOffset] = line[lineOffset];
-                resultOffset++;
-            }
+            value[resultOffset] = line[lineOffset];
+            resultOffset++;
             lineOffset++;
         }
+        name[resultOffset] == '\n';
+
+        stripWhiteSpace(name);
+        stripWhiteSpace(value);
 
         int matchingOptionIndex = -1;
         for(int i = 0; i < optionsCount; i++)
