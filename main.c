@@ -1,20 +1,25 @@
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_image.h>
 #include <time.h>
-//#include <unistd.h>
 #include <math.h>
 
-//for printf
-#include <stdio.h>
-// for getPathToExecutable
-#include <libloaderapi.h>
-// for sleep
-#include <windows.h>
+#ifdef __linux__
+	#include <unistd.h>
+#endif
 
-int usleep(int microseconds)
-{
-	Sleep(microseconds / 1000);
-}
+#ifdef __MINGW32__
+	//for printf
+	#include <stdio.h>
+	// for getPathToExecutable
+	#include <libloaderapi.h>
+	// for sleep
+	#include <windows.h>
+
+	int usleep(int microseconds)
+	{
+		Sleep(microseconds / 1000);
+	}
+#endif
 
 #define WINDOW_X (3840)
 #define WINDOW_Y (2160)
@@ -27,22 +32,6 @@ float degtan(float deg) {return tan(deg*0.0174532925);}
 float degasin(float val) {return 57.2957795*asin(val);}
 float degacos(float val) {return 57.2957795*acos(val);}
 float degatan(float val) {return 57.2957795*atan(val);}
-
-
-void getPathToExecutable(char* buf, int bufLen)
-{
-	//readlink("/proc/self/exe", buf, bufLen); //Linux.
-	GetModuleFileName(NULL, buf, bufLen); //Windows?
-
-	for(int i = bufLen - 1; i >= 0; i--)
-	{
-		if(buf[i] == '/')
-		{
-			break;
-		}
-		buf[i] = 0;
-	}
-}
 
 struct Vector2
 {
@@ -58,6 +47,25 @@ struct Object
 	int spriteSize;
 	SDL_Surface* spriteSheet;
 } typedef Object;
+
+	void getPathToExecutable(char* buf, int bufLen)
+	{
+		#ifdef __linux__
+			readlink("/proc/self/exe", buf, bufLen);
+		#endif
+		#ifdef __MINGW32__
+			GetModuleFileName(NULL, buf, bufLen);
+		#endif
+
+		for(int i = bufLen - 1; i >= 0; i--)
+		{
+			if(buf[i] == '/')
+			{
+				break;
+			}
+			buf[i] = 0;
+		}
+	}
 
 int rotToFrame(float rot) { return (int)(rot  / (360.0 / (float)SPRITE_ORIENTATIONS) + 0.5) % SPRITE_ORIENTATIONS; }
 
