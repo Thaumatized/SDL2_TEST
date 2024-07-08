@@ -1,8 +1,9 @@
-#blender stuff
+#tool related
 *.blend1
+.vscode/
 
 #compiled stuff
 bin/
 
-#vscode
-.vscode/
+#Libraries
+SDL2/
