@@ -21,10 +21,45 @@
 	}
 #endif
 
-#define WINDOW_X (3840)
-#define WINDOW_Y (2160)
+#include "configReader.c"
+
 #define SPRITE_ORIENTATIONS (72)
 #define MAX_FILE_PATH (1024)
+
+int WINDOW_X = 640;
+int WINDOW_Y = 360;
+int DISPLAY_MODE = 0; // 0 == windowed
+
+void getConfig(char* pathToExecutable) {
+	char path[MAX_FILE_PATH];
+	memset(path, 0, MAX_FILE_PATH);
+	strcat(path, pathToExecutable);
+	strcat(path, "config.ini");
+
+	char displayMode[MAX_LINE];
+	memset(displayMode, 0, MAX_LINE);
+
+	config_fetch_options config_options[] = {
+		{"WINDOW_X", &WINDOW_X, CONFIG_INT},
+		{"WINDOW_Y", &WINDOW_Y, CONFIG_INT},
+		{"DISPLAY_MODE", displayMode, CONFIG_STRING},
+	};
+
+	getConfigurations(path, config_options, 3);
+
+	if(strcmp(displayMode, "fullscreen") == 0)
+	{
+		DISPLAY_MODE = SDL_WINDOW_FULLSCREEN;
+	}
+	else if(strcmp(displayMode, "windowed fullscreen") == 0)
+	{
+		DISPLAY_MODE = SDL_WINDOW_FULLSCREEN_DESKTOP;
+	}
+	else if(strcmp(displayMode, "windowed") == 0)
+	{
+		DISPLAY_MODE = 0; //Windowed
+	}
+}
 
 float degsin(float deg) {return sin(deg*0.0174532925);}
 float degcos(float deg) {return cos(deg*0.0174532925);}
@@ -48,24 +83,24 @@ struct Object
 	SDL_Surface* spriteSheet;
 } typedef Object;
 
-	void getPathToExecutable(char* buf, int bufLen)
-	{
-		#ifdef __linux__
-			readlink("/proc/self/exe", buf, bufLen);
-		#endif
-		#ifdef __MINGW32__
-			GetModuleFileName(NULL, buf, bufLen);
-		#endif
+void getPathToExecutable(char* buf, int bufLen)
+{
+	#ifdef __linux__
+		readlink("/proc/self/exe", buf, bufLen);
+	#endif
+	#ifdef __MINGW32__
+		GetModuleFileName(NULL, buf, bufLen);
+	#endif
 
-		for(int i = bufLen - 1; i >= 0; i--)
+	for(int i = bufLen - 1; i >= 0; i--)
+	{
+		if(buf[i] == '/')
 		{
-			if(buf[i] == '/')
-			{
-				break;
-			}
-			buf[i] = 0;
+			break;
 		}
+		buf[i] = 0;
 	}
+}
 
 int rotToFrame(float rot) { return (int)(rot  / (360.0 / (float)SPRITE_ORIENTATIONS) + 0.5) % SPRITE_ORIENTATIONS; }
 
@@ -98,6 +133,8 @@ int main(int argc, char* argv[])
 	char path[MAX_FILE_PATH];
 	memset(path, 0, MAX_FILE_PATH);
 
+	getConfig(pathToExecutable);
+
 	if (SDL_Init(SDL_INIT_VIDEO) < 0) {
 		printf("Failed to initialize SDL: %s\n", SDL_GetError());
 		return 1;
@@ -109,7 +146,7 @@ int main(int argc, char* argv[])
 		                                  WINDOW_X, WINDOW_Y,
 		                                  SDL_WINDOW_SHOWN);
 		                                  
-	SDL_SetWindowFullscreen(window, SDL_WINDOW_FULLSCREEN_DESKTOP);
+	SDL_SetWindowFullscreen(window, DISPLAY_MODE);
 		                                
 	if (!window) {
 		printf("Failed to create SDL window: %s\n", SDL_GetError());
@@ -120,6 +157,12 @@ int main(int argc, char* argv[])
 	if (!renderer) {
 		printf("Failed to create SDL renderer: %s\n", SDL_GetError());
 		return 1;
+	}
+
+	//if windowed fullscreen resolution will be the screen resolutions and so it shouldn't be based on settings
+	if(DISPLAY_MODE == SDL_WINDOW_FULLSCREEN_DESKTOP)
+	{
+		SDL_GetWindowSize(window, &WINDOW_X, &WINDOW_Y);
 	}
 
 	int FrameRate = 60;
@@ -181,7 +224,6 @@ int main(int argc, char* argv[])
 		SDL_SetRenderDrawColor(renderer, 153, 138, 78, 255);
 		SDL_RenderClear(renderer); //erase
 
-		SDL_Texture *texture;
 		int animFrame = 0;
 		int rotFrame = 0;
 
@@ -206,13 +248,16 @@ int main(int argc, char* argv[])
 			SDL_Rect srcrect = { rotFrame*monkeyHeads[i].spriteSize, animFrame*monkeyHeads[i].spriteSize, 128, 128 };
 			SDL_Rect dstrect = { 0, 0, 0, 0 };
 			SDL_BlitSurface(monkeyHeads[i].spriteSheet, &srcrect, img, &dstrect);
-			texture = SDL_CreateTextureFromSurface(renderer, img);
+			SDL_Texture *texture = SDL_CreateTextureFromSurface(renderer, img);
 			SDL_SetTextureBlendMode(texture, SDL_BLENDMODE_BLEND);
 			dstrect.x = monkeyHeads[i].pos.x;
 			dstrect.y = monkeyHeads[i].pos.y;
 			dstrect.w = 256;
 			dstrect.h = 256;
 			SDL_RenderCopy(renderer, texture, NULL, &dstrect);
+
+			SDL_FreeSurface(img);
+			SDL_DestroyTexture(texture);
 		}
 
 		//TEST OBJECT
@@ -241,7 +286,7 @@ int main(int argc, char* argv[])
 		SDL_Rect srcrect = { rotFrame*testObject.spriteSize, animFrame*testObject.spriteSize, 128, 128 };
 		SDL_Rect dstrect = { 0, 0, 0, 0 };
 		SDL_BlitSurface(testObject.spriteSheet, &srcrect, img, &dstrect);
-		texture = SDL_CreateTextureFromSurface(renderer, img);
+		SDL_Texture *texture = SDL_CreateTextureFromSurface(renderer, img);
 		SDL_SetTextureBlendMode(texture, SDL_BLENDMODE_BLEND);
 		//SHADOW
 		dstrect.x = testObject.pos.x + 64;
@@ -272,6 +317,9 @@ int main(int argc, char* argv[])
 			testObject.pos.y += WINDOW_Y + 256;
 		}
 
+		SDL_FreeSurface(img);
+		SDL_DestroyTexture(texture);
+		
 		SDL_RenderPresent(renderer);
 
 		SDL_Event event;
