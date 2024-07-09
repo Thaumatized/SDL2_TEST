@@ -106,11 +106,11 @@ int rotToFrame(float rot) { return (int)(rot  / (360.0 / (float)SPRITE_ORIENTATI
 
 Vector2 rotToVector2(float rot)
 {
-	int ySing = 1 - (rot > 90 || rot < 270)*2;
+	int ySign = 1 - (rot > 90 || rot < 270)*2;
 
 	Vector2 result = {
 		degsin(rot),
-		degcos(rot)*ySing
+		degcos(rot)*ySign
 	};
 	return result;
 }
