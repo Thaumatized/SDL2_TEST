@@ -1,17 +1,25 @@
-all: mkdir bin/laser-tank bin/sprites bin/config.ini
+all: directories common linux windows
 
-.PHONY: mkdir clean
+.PHONY: directories clean common linux windows
 
-mkdir:
+# What you are supposed to call
+clean:
+	@echo "Cleaning old binaries"
+	@rm bin -rf
+
+linux: directories common bin/laser-tank
+
+windows: directories common bin/laser-tank.exe bin/SDL2.dll bin/SDL2_image.dll
+
+#Common
+common: directories bin/config.ini bin/sprites
+
+directories:
 	@mkdir -p bin/sprites/
 
-bin/laser-tank: main.c configReader.c
-	@echo "Compiling game"
-	gcc main.c -o bin/laser-tank `sdl2-config --cflags --libs` -lSDL2_image -lm;
-
-bin/config.ini:
+bin/config.ini: default-config.ini
 	@echo "Copying default config"
-	cp default-config.ini bin/config.ini
+	@cp default-config.ini bin/config.ini
 	
 bin/sprites: bin/sprites/monkeysheet.png bin/sprites/shadow.png
 	@echo "Sprites done"
@@ -24,5 +32,20 @@ bin/sprites/shadow.png: sprites/shadowmaker.py
 	@echo "Making shadow"
 	@python3 sprites/shadowmaker.py;
 
-clean:
-	rm bin -r
+#Linux
+bin/laser-tank: main.c configReader.c
+	@echo "Compiling game for Linux"
+	@gcc main.c -o bin/laser-tank `sdl2-config --cflags --libs` -lSDL2_image -lm;
+
+#Windows
+bin/laser-tank.exe: main.c configReader.c
+	@echo "Compiling game for Windows"
+	@x86_64-w64-mingw32-gcc main.c -o bin/laser-tank.exe -ISDL2/include/ -LSDL2/lib/ -lmingw32 -lSDL2main -lSDL2 -lSDL2_image
+
+bin/SDL2.dll: SDL2/bin/SDL2.dll
+	@cp SDL2/bin/SDL2.dll bin/SDL2.dll
+
+bin/SDL2_image.dll: SDL2/bin/SDL2_image.dll
+	@cp SDL2/bin/SDL2_image.dll bin/SDL2_image.dll
+	
+
