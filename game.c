@@ -14,7 +14,7 @@
 	#include <libloaderapi.h>
 #endif
 
-#include "configReader.c"
+#include "enchant-engine/configReader.c"
 #include "enchant-engine/enchant-engine.h"
 
 #define SPRITE_ORIENTATIONS (72)
