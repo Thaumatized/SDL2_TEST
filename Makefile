@@ -33,14 +33,14 @@ bin/sprites/shadow.png: sprites/shadowmaker.py
 	@python3 sprites/shadowmaker.py;
 
 #Linux
-bin/laser-tank: main.c configReader.c
+bin/laser-tank: enchant-engine/* game.c configReader.c
 	@echo "Compiling game for Linux"
-	@gcc main.c -o bin/laser-tank `sdl2-config --cflags --libs` -lSDL2_image -lm;
+	@gcc enchant-engine/enchant-engine.c game.c -o bin/laser-tank `sdl2-config --cflags --libs` -lSDL2_image -lm;
 
 #Windows
-bin/laser-tank.exe: main.c configReader.c
+bin/laser-tank.exe: enchant-engine/* game.c configReader.c
 	@echo "Compiling game for Windows"
-	@x86_64-w64-mingw32-gcc main.c -o bin/laser-tank.exe -ISDL2/include/ -LSDL2/lib/ -lmingw32 -lSDL2main -lSDL2 -lSDL2_image
+	@x86_64-w64-mingw32-gcc enchant-engine/enchant-engine.c game.c -o bin/laser-tank.exe -ISDL2/include/ -LSDL2/lib/ -lmingw32 -lSDL2main -lSDL2 -lSDL2_image
 
 bin/SDL2.dll: SDL2/bin/SDL2.dll
 	@cp SDL2/bin/SDL2.dll bin/SDL2.dll

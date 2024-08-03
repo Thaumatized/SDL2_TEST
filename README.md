@@ -6,7 +6,9 @@ Anways, since the best way to do both of these things is to make a game, this wi
 
 ## Compilation for linux (mint)
 ### Prerequisites:
-Make sure to have python3 and pillow installed.
+Make sure to have python3 and pillow installed.  
+Be sure to get the enchant engine.
+> git submodule update --init
 
 Install sdl2 and sdl2-image developement libaries:
 > sudo apt install libsdl2-dev;  
@@ -16,7 +18,9 @@ Install sdl2 and sdl2-image developement libaries:
 
 ## Compilation for Windows from linux (mint)
 ### Prerequisites:
-Make sure to have python3 and pillow installed.
+Make sure to have python3 and pillow installed.  
+Be sure to get the enchant engine.
+> git submodule update --init
 
 install mingw64 for compilation
 > sudo apt install mingw-w64;
