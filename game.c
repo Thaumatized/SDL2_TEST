@@ -329,11 +329,10 @@ int update(int frame)
 	SDL_RenderPresent(renderer);
 
 	SDL_Event event;
-	int quit = 0;
 	while (SDL_PollEvent(&event)) {
 		switch (event.type) {
 			case SDL_QUIT:
-				quit = 1;
+				closeGame();
 				break;
 			case SDL_KEYDOWN:
 				if(!strcmp(SDL_GetKeyName(event.key.keysym.sym), "A"))
@@ -372,11 +371,6 @@ int update(int frame)
 				}
 				break;
 		}
-	}
-	
-	if(quit)
-	{
-		closeGame();
 	}
 	
 	frame++;
