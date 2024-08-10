@@ -16,6 +16,7 @@
 
 #include "enchant-engine/configReader.c"
 #include "enchant-engine/enchant-engine.h"
+#include "enchant-engine/input.h"
 
 #define SPRITE_ORIENTATIONS (72)
 #define MAX_FILE_PATH (1024)
