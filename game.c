@@ -139,6 +139,9 @@ int S = 0;
 
 int initialize(int argc, char* argv[])
 {
+	setBinding("Aakkonen", "A");
+	setBinding("Beekkönen", "B");
+
 	printf("path to excutable\n");
 	char pathToExecutable[MAX_FILE_PATH];
 	memset(pathToExecutable, 0, MAX_FILE_PATH);
