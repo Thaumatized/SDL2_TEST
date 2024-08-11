@@ -328,51 +328,6 @@ int update(int frame)
 	SDL_DestroyTexture(texture);
 	
 	SDL_RenderPresent(renderer);
-
-	SDL_Event event;
-	while (SDL_PollEvent(&event)) {
-		switch (event.type) {
-			case SDL_QUIT:
-				closeGame();
-				break;
-			case SDL_KEYDOWN:
-				if(!strcmp(SDL_GetKeyName(event.key.keysym.sym), "A"))
-				{
-					A = 1;
-				}
-				else if(!strcmp(SDL_GetKeyName(event.key.keysym.sym), "D"))
-				{
-					D = 1;
-				}
-				if(!strcmp(SDL_GetKeyName(event.key.keysym.sym), "W"))
-				{
-					W = 1;
-				}
-				else if(!strcmp(SDL_GetKeyName(event.key.keysym.sym), "S"))
-				{
-					S = 1;
-				}
-				break;
-			case SDL_KEYUP:
-				if(!strcmp(SDL_GetKeyName(event.key.keysym.sym), "A"))
-				{
-					A = 0;
-				}
-				if(!strcmp(SDL_GetKeyName(event.key.keysym.sym), "D"))
-				{
-					D = 0;
-				}
-				if(!strcmp(SDL_GetKeyName(event.key.keysym.sym), "W"))
-				{
-					W = 0;
-				}
-				else if(!strcmp(SDL_GetKeyName(event.key.keysym.sym), "S"))
-				{
-					S = 0;
-				}
-				break;
-		}
-	}
 	
 	frame++;
 }
