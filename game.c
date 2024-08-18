@@ -137,10 +137,21 @@ int D = 0;
 int W = 0;
 int S = 0;
 
+//Binding indexes
+int bindingForward;
+int bindingBack;
+int bindingLeft;
+int bindingRight;
+int bindingQuickTurn;
+
 int initialize(int argc, char* argv[])
 {
-	setBinding("Aakkonen", "A");
-	setBinding("Beekkönen", "B");
+	printf("Binding inputs \n");
+	bindingForward = setBinding("Forward", "w;Up");
+	bindingBack = setBinding("Backward", "s;Down");
+	bindingLeft = setBinding("Left", "a;Left");
+	bindingRight = setBinding("Right", "d;Right");
+	bindingQuickTurn = setBinding("Quick Turn", "Left Ctrl+R");
 
 	printf("path to excutable\n");
 	char pathToExecutable[MAX_FILE_PATH];
@@ -271,7 +282,11 @@ int update(int frame)
 	}
 
 	//TEST GameObject
-	testGameObject.rot += (-A + D) * 6;
+	testGameObject.rot += (-bindingPressed(bindingLeft) + bindingPressed(bindingRight)) * 6;
+	if(bindingPressedThisFrame(bindingQuickTurn))
+	{
+		testGameObject.rot += 180;
+	}
 	if(testGameObject.rot < 0) testGameObject.rot += 360;
 	if(testGameObject.rot > 360) testGameObject.rot -= 360;
 	rotFrame = rotToFrame(testGameObject.rot);
@@ -288,7 +303,7 @@ int update(int frame)
 	*/
 	animFrame = 59;
 
-	testGameObject.vel = multiplyVector2(rotToVector2(testGameObject.rot), (-S+W)*15);
+	testGameObject.vel = multiplyVector2(rotToVector2(testGameObject.rot), (-bindingPressed(bindingBack)+bindingPressed(bindingForward))*15);
 	
 	testGameObject.pos.x += testGameObject.vel.x;
 	testGameObject.pos.y += testGameObject.vel.y;
