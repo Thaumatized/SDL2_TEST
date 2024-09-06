@@ -85,19 +85,28 @@ void getPathToExecutable(char* buf, int bufLen)
 {
 	#ifdef __linux__
 		readlink("/proc/self/exe", buf, bufLen);
+
+		for(int i = bufLen - 1; i >= 0; i--)
+		{
+			if(buf[i] == '/')
+			{
+				break;
+			}
+			buf[i] = 0;
+		}
 	#endif
 	#ifdef __MINGW32__
 		GetModuleFileName(NULL, buf, bufLen);
-	#endif
 
-	for(int i = bufLen - 1; i >= 0; i--)
-	{
-		if(buf[i] == '/')
+		for(int i = bufLen - 1; i >= 0; i--)
 		{
-			break;
+			if(buf[i] == '\\')
+			{
+				break;
+			}
+			buf[i] = 0;
 		}
-		buf[i] = 0;
-	}
+	#endif
 }
 
 int rotToFrame(float rot) { return (int)(rot  / (360.0 / (float)SPRITE_ORIENTATIONS) + 0.5) % SPRITE_ORIENTATIONS; }
@@ -136,7 +145,7 @@ int D = 0;
 int W = 0;
 int S = 0;
 
-int initialize(int argc, char* argv[])
+void initialize(int argc, char* argv[])
 {
 	printf("path to excutable\n");
 	char pathToExecutable[MAX_FILE_PATH];
@@ -148,11 +157,10 @@ int initialize(int argc, char* argv[])
 	printf("config\n");
 	getConfig(pathToExecutable);
 
-
 	printf("SDL init\n");
 	if (SDL_Init(SDL_INIT_VIDEO) < 0) {
 		printf("Failed to initialize SDL: %s\n", SDL_GetError());
-		return 1;
+		exit(1);
 	}
 
 	window = SDL_CreateWindow("My SDL2 Window",
@@ -165,13 +173,13 @@ int initialize(int argc, char* argv[])
 		                                
 	if (!window) {
 		printf("Failed to create SDL window: %s\n", SDL_GetError());
-		return 1;
+		exit(1);
 	}
 
 	renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED || SDL_RENDERER_PRESENTVSYNC);
 	if (!renderer) {
 		printf("Failed to create SDL renderer: %s\n", SDL_GetError());
-		return 1;
+		exit(1);
 	}
 
 	//if windowed fullscreen resolution will be the screen resolutions and so it shouldn't be based on settings
@@ -225,7 +233,7 @@ int initialize(int argc, char* argv[])
 	}
 }
 
-int update(int frame)
+void update(int frame)
 {
 	SDL_SetRenderDrawColor(renderer, 153, 138, 78, 255);
 	SDL_RenderClear(renderer); //erase
@@ -236,11 +244,6 @@ int update(int frame)
 	//Rotating monkey heads
 	for(int i = 0; i < 4; i++)
 	{
-		//int animFrame = ((frame%(SPRITE_ORIENTATIONS*4)/4) + (SPRITE_ORIENTATIONS/4*(x+y*2))) % SPRITE_ORIENTATIONS;
-		//SDL_Texture *texture = SDL_CreateTextureFromSurface(renderer, images[animFrame]);
-		//SDL_Rect dstrect = { (WINDOW_X-256)*x, (WINDOW_Y-256)*y, 256, 256 };
-		
-
 		monkeyHeads[i].rot = (monkeyHeads[i].rot + 1);
 		if(monkeyHeads[i].rot < 0) monkeyHeads[i].rot += 360;
 		if(monkeyHeads[i].rot > 360) monkeyHeads[i].rot -= 360;
@@ -382,7 +385,7 @@ int update(int frame)
 	frame++;
 }
 
-int cleanUp()
+void cleanUp()
 {
 	SDL_DestroyRenderer(renderer);
 	SDL_DestroyWindow(window);
