@@ -1,3 +1,15 @@
+ifeq ($(OS),Windows_NT)
+	.DEFAULT_GOAL := windows
+else
+	UNAME_S := $(shell uname -s)
+	ifeq ($(UNAME_S),Linux)
+		.DEFAULT_GOAL := linux
+	endif
+	ifeq ($(UNAME_S),Darwin)
+		.DEFAULT_GOAL := mac
+	endif
+endif
+
 all: directories common linux windows
 
 .PHONY: directories clean common linux windows
@@ -7,7 +19,12 @@ clean:
 	@echo "Cleaning old binaries"
 	@rm bin -rf
 
+ifeq ($(OS),Windows_NT)
+linux: 
+	@echo "Unfortunately you can't compile for linux from windows"
+else
 linux: directories common bin/laser-tank
+endif
 
 windows: directories common bin/laser-tank.exe bin/SDL2.dll bin/SDL2_image.dll
 

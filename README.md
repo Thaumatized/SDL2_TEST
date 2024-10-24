@@ -14,7 +14,7 @@ Install sdl2 and sdl2-image developement libaries:
 > sudo apt install libsdl2-dev;  
 > sudo apt install libsdl2-image-dev;  
 ### compile && run:  
-> make linux; ./bin/laser-tank  
+> make; ./bin/laser-tank  
 
 ## Compilation for Windows from linux (mint)
 ### Prerequisites:
@@ -32,11 +32,27 @@ Extract the 64 bit include, lib and bin folders into a folder called "SDL2" from
 ### compile && run:  
 > make windows; ./bin/laser-tank.exe
 
+## Compilation for Windows from Windows
+### Prerequisites:
+Make sure to have python3 and pillow installed.
+Be sure to get the enchant engine.
+> git submodule update --init
+
+You will need MinGW-w64 for compilation. I use LLVM-MinGW, specifically [llvm-mingw-VERSION-ucrt-x86_64](https://github.com/mstorsjo/llvm-mingw/releases)
+
+Download the [SDL developement](https://github.com/libsdl-org/SDL/releases) libary (SDL2-devel-VERSION-mingw.zip) and [SDL_image](https://github.com/libsdl-org/SDL_image/releases) library (SDL2_image-devel-VERSION-mingw.zip).
+
+Extract the 64 bit include, lib and bin folders into a folder called "SDL2" from both, merging the folders.
+
+### compile && run:  
+> mingw32-make.exe; ./bin/laser-tank.exe
+
+
 ## Other things about compilation
-### All platforms
-calling make alone, or with all, will compile for all platforms.
+calling make alone will compile for current platfrom
 > make
-or
+
+calling make with the "all" target will compile for every available platform
 > make all
 ### Clean
 Make has the "clean" target which removes the binary folder. This is seldom needed, but it can be helpful if there is something weird in the folder, such as a bad config file.

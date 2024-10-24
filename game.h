@@ -1,5 +1,5 @@
-int initialize(int argc, char* argv[]);
+void initialize(int argc, char* argv[]);
 
-int update(int frame);
+void update(int frame);
 
-int cleanUp();
+void cleanUp();
