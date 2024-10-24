@@ -147,11 +147,11 @@ int bindingQuickTurn;
 int initialize(int argc, char* argv[])
 {
 	printf("Binding inputs \n");
-	bindingForward = bindAction("Forward", "w;Up");
-	bindingBack = bindAction("Backward", "s;Down");
-	bindingLeft = bindAction("Left", "a;Left");
-	bindingRight = bindAction("Right", "d;Right");
-	bindingQuickTurn = bindAction("Quick Turn", "Left Ctrl+R");
+	bindingForward = bindAction("Forward", "w;Up", "");
+	bindingBack = bindAction("Backward", "s;Down", "");
+	bindingLeft = bindAction("Left", "a;Left", "");
+	bindingRight = bindAction("Right", "d;Right", "");
+	bindingQuickTurn = bindAction("Quick Turn", "Left Ctrl+R", "");
 
 	printf("path to excutable\n");
 	char pathToExecutable[MAX_FILE_PATH];
