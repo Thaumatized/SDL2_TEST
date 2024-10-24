@@ -16,6 +16,7 @@
 
 #include "enchant-engine/configReader.c"
 #include "enchant-engine/enchant-engine.h"
+#include "enchant-engine/input.h"
 
 #define SPRITE_ORIENTATIONS (72)
 #define MAX_FILE_PATH (1024)
@@ -145,8 +146,22 @@ int D = 0;
 int W = 0;
 int S = 0;
 
+//Binding indexes
+int bindingForward;
+int bindingBack;
+int bindingLeft;
+int bindingRight;
+int bindingQuickTurn;
+
 void initialize(int argc, char* argv[])
 {
+	printf("Binding inputs \n");
+	bindingForward = bindAction("Forward", "w;Up");
+	bindingBack = bindAction("Backward", "s;Down");
+	bindingLeft = bindAction("Left", "a;Left");
+	bindingRight = bindAction("Right", "d;Right");
+	bindingQuickTurn = bindAction("Quick Turn", "Left Ctrl+R");
+
 	printf("path to excutable\n");
 	char pathToExecutable[MAX_FILE_PATH];
 	memset(pathToExecutable, 0, MAX_FILE_PATH);
@@ -270,7 +285,11 @@ void update(int frame)
 	}
 
 	//TEST GameObject
-	testGameObject.rot += (-A + D) * 6;
+	testGameObject.rot += (-actionPressed(bindingLeft) + actionPressed(bindingRight)) * 6;
+	if(actionPressedThisFrame(bindingQuickTurn))
+	{
+		testGameObject.rot += 180;
+	}
 	if(testGameObject.rot < 0) testGameObject.rot += 360;
 	if(testGameObject.rot > 360) testGameObject.rot -= 360;
 	rotFrame = rotToFrame(testGameObject.rot);
@@ -287,7 +306,7 @@ void update(int frame)
 	*/
 	animFrame = 59;
 
-	testGameObject.vel = multiplyVector2(rotToVector2(testGameObject.rot), (-S+W)*15);
+	testGameObject.vel = multiplyVector2(rotToVector2(testGameObject.rot), (-actionPressed(bindingBack)+actionPressed(bindingForward))*15);
 	
 	testGameObject.pos.x += testGameObject.vel.x;
 	testGameObject.pos.y += testGameObject.vel.y;
@@ -330,57 +349,6 @@ void update(int frame)
 	SDL_DestroyTexture(texture);
 	
 	SDL_RenderPresent(renderer);
-
-	SDL_Event event;
-	int quit = 0;
-	while (SDL_PollEvent(&event)) {
-		switch (event.type) {
-			case SDL_QUIT:
-				quit = 1;
-				break;
-			case SDL_KEYDOWN:
-				if(!strcmp(SDL_GetKeyName(event.key.keysym.sym), "A"))
-				{
-					A = 1;
-				}
-				else if(!strcmp(SDL_GetKeyName(event.key.keysym.sym), "D"))
-				{
-					D = 1;
-				}
-				if(!strcmp(SDL_GetKeyName(event.key.keysym.sym), "W"))
-				{
-					W = 1;
-				}
-				else if(!strcmp(SDL_GetKeyName(event.key.keysym.sym), "S"))
-				{
-					S = 1;
-				}
-				break;
-			case SDL_KEYUP:
-				if(!strcmp(SDL_GetKeyName(event.key.keysym.sym), "A"))
-				{
-					A = 0;
-				}
-				if(!strcmp(SDL_GetKeyName(event.key.keysym.sym), "D"))
-				{
-					D = 0;
-				}
-				if(!strcmp(SDL_GetKeyName(event.key.keysym.sym), "W"))
-				{
-					W = 0;
-				}
-				else if(!strcmp(SDL_GetKeyName(event.key.keysym.sym), "S"))
-				{
-					S = 0;
-				}
-				break;
-		}
-	}
-	
-	if(quit)
-	{
-		closeGame();
-	}
 	
 	frame++;
 }
