@@ -17,6 +17,7 @@
 #include "enchant-engine/configReader.c"
 #include "enchant-engine/enchant-engine.h"
 #include "enchant-engine/input.h"
+#include "enchant-engine/physics.h"
 
 #define SPRITE_ORIENTATIONS (72)
 #define MAX_FILE_PATH (1024)
@@ -73,15 +74,6 @@ struct Vector2
 	float y;
 } typedef Vector2;
 
-struct GameObject
-{
-	Vector2 pos;
-	Vector2 vel;
-	float rot;
-	int spriteSize;
-	SDL_Surface* spriteSheet;
-} typedef GameObject;
-
 void getPathToExecutable(char* buf, int bufLen)
 {
 	#ifdef __linux__
@@ -137,14 +129,21 @@ SDL_Window *window;
 SDL_Renderer *renderer;
 SDL_Texture *shadowTexture;
 
-GameObject testGameObject;
-GameObject monkeyHeads[4];
+int testEntity = createEntity();
+physics_component testEntityPhysics = createPhysicsComponent(testEntity);
+int monkeyHeads[4] = {
+	createEntity(),
+	createEntity(),
+	createEntity(),
+	createEntity(),
+};
+physics_component monkeyHeadPhysics[4] = {
+	createPhysicsComponent(monkeyHeads[0]),
+	createPhysicsComponent(monkeyHeads[1]),
+	createPhysicsComponent(monkeyHeads[2]),
+	createPhysicsComponent(monkeyHeads[3]),
+}
 
-//test GameObject control variables
-int A = 0;
-int D = 0;
-int W = 0;
-int S = 0;
 
 //Binding indexes
 int bindingForward;
@@ -206,16 +205,6 @@ void initialize(int argc, char* argv[])
 	int FrameRate = 60;
 	int ClocksPerFrame = CLOCKS_PER_SEC / FrameRate;
 	int frame = 0;
-	
-	//Test monkey heads preparation
-    SDL_Surface *images[SPRITE_ORIENTATIONS];
-    for(int i = 0; i < SPRITE_ORIENTATIONS; i++)
-    {
-    	char spritelocation[] = "sprites/monkey/0001.png";
-    	spritelocation[17] = 48 + (i+ 1)/10; //to ascii number
-    	spritelocation[18] = 48 + ((i+ 1)%10); //to ascii number
-    	images[i]= IMG_Load(spritelocation);
-    }
 
 	memset(path, 0, MAX_FILE_PATH);
 	strcat(path, pathToExecutable);
@@ -224,12 +213,8 @@ void initialize(int argc, char* argv[])
 	shadowTexture = SDL_CreateTextureFromSurface(renderer, shadowImage);
 
 	//TEST GameObject
-	testGameObject.pos.x = WINDOW_X/2;
-	testGameObject.pos.y = WINDOW_Y/2;
-	testGameObject.vel.x = 0;
-	testGameObject.vel.y = 0;
-	testGameObject.rot = 0;
-	testGameObject.spriteSize = 128;
+	testEntityPhysics.position.x = WINDOW_X/2;
+	testEntityPhysics.position.y = WINDOW_Y/2;
 	memset(path, 0, MAX_FILE_PATH);
 	strcat(path, pathToExecutable);
 	strcat(path, "sprites/monkeysheet.png");
@@ -243,8 +228,6 @@ void initialize(int argc, char* argv[])
 		monkeyHeads[i].vel.x = 0;
 		monkeyHeads[i].vel.y = 0;
 		monkeyHeads[i].rot = 0;
-		monkeyHeads[i].spriteSize = 128;
-		monkeyHeads[i].spriteSheet = testGameObject.spriteSheet;
 	}
 }
 
@@ -268,8 +251,8 @@ void update(int frame)
 		{
 			animFrame *= -1;
 		}
-		SDL_Surface *img = SDL_CreateRGBSurface(0, monkeyHeads[i].spriteSize, monkeyHeads[i].spriteSize, 32, 0xFF000000, 0x00FF0000, 0x0000FF00, 0x000000FF);
-		SDL_Rect srcrect = { rotFrame*monkeyHeads[i].spriteSize, animFrame*monkeyHeads[i].spriteSize, 128, 128 };
+		SDL_Surface *img = SDL_CreateRGBSurface(0, 128, 128, 32, 0xFF000000, 0x00FF0000, 0x0000FF00, 0x000000FF);
+		SDL_Rect srcrect = { rotFrame*128, animFrame*128, 128, 128 };
 		SDL_Rect dstrect = { 0, 0, 0, 0 };
 		SDL_BlitSurface(monkeyHeads[i].spriteSheet, &srcrect, img, &dstrect);
 		SDL_Texture *texture = SDL_CreateTextureFromSurface(renderer, img);
@@ -310,8 +293,8 @@ void update(int frame)
 	
 	testGameObject.pos.x += testGameObject.vel.x;
 	testGameObject.pos.y += testGameObject.vel.y;
-	SDL_Surface *img = SDL_CreateRGBSurface(0, testGameObject.spriteSize, testGameObject.spriteSize, 32, 0xFF000000, 0x00FF0000, 0x0000FF00, 0x000000FF);
-	SDL_Rect srcrect = { rotFrame*testGameObject.spriteSize, animFrame*testGameObject.spriteSize, 128, 128 };
+	SDL_Surface *img = SDL_CreateRGBSurface(0, 128, 128, 32, 0xFF000000, 0x00FF0000, 0x0000FF00, 0x000000FF);
+	SDL_Rect srcrect = { rotFrame*128, animFrame*128, 128, 128 };
 	SDL_Rect dstrect = { 0, 0, 0, 0 };
 	SDL_BlitSurface(testGameObject.spriteSheet, &srcrect, img, &dstrect);
 	SDL_Texture *texture = SDL_CreateTextureFromSurface(renderer, img);
