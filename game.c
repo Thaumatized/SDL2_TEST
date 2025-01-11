@@ -68,12 +68,6 @@ float degasin(float val) {return 57.2957795*asin(val);}
 float degacos(float val) {return 57.2957795*acos(val);}
 float degatan(float val) {return 57.2957795*atan(val);}
 
-struct Vector2
-{
-	float x;
-	float y;
-} typedef Vector2;
-
 void getPathToExecutable(char* buf, int bufLen)
 {
 	#ifdef __linux__
@@ -129,20 +123,13 @@ SDL_Window *window;
 SDL_Renderer *renderer;
 SDL_Texture *shadowTexture;
 
-int testEntity = createEntity();
-physics_component testEntityPhysics = createPhysicsComponent(testEntity);
-int monkeyHeads[4] = {
-	createEntity(),
-	createEntity(),
-	createEntity(),
-	createEntity(),
-};
-physics_component monkeyHeadPhysics[4] = {
-	createPhysicsComponent(monkeyHeads[0]),
-	createPhysicsComponent(monkeyHeads[1]),
-	createPhysicsComponent(monkeyHeads[2]),
-	createPhysicsComponent(monkeyHeads[3]),
-}
+int testEntity;
+physics_component testEntityPhysics;
+
+int monkeyHeads[4];
+physics_component monkeyHeadPhysics[4];
+
+SDL_Surface *monkeySpriteSheet;
 
 
 //Binding indexes
@@ -212,22 +199,26 @@ void initialize(int argc, char* argv[])
 	SDL_Surface *shadowImage = IMG_Load(path);
 	shadowTexture = SDL_CreateTextureFromSurface(renderer, shadowImage);
 
-	//TEST GameObject
-	testEntityPhysics.position.x = WINDOW_X/2;
-	testEntityPhysics.position.y = WINDOW_Y/2;
 	memset(path, 0, MAX_FILE_PATH);
 	strcat(path, pathToExecutable);
 	strcat(path, "sprites/monkeysheet.png");
-	testGameObject.spriteSheet = IMG_Load(path);
+	monkeySpriteSheet = IMG_Load(path);
 
+	//TEST GameObject
+	testEntity = createEntity();
+	testEntityPhysics = *(createPhysicsComponent(testEntity));
+	testEntityPhysics.position.x = WINDOW_X/2;
+	testEntityPhysics.position.y = WINDOW_Y/2;
 
 	for(int i = 0; i < 4; i++)
 	{
-		monkeyHeads[i].pos.x = (WINDOW_X-256) * (i % 2);
-		monkeyHeads[i].pos.y = (WINDOW_Y-256) * (i / 2);;
-		monkeyHeads[i].vel.x = 0;
-		monkeyHeads[i].vel.y = 0;
-		monkeyHeads[i].rot = 0;
+		monkeyHeads[i] = createEntity();
+		monkeyHeadPhysics[i] = *(createPhysicsComponent(monkeyHeads[i]));
+		monkeyHeadPhysics[i].position.x = (WINDOW_X-256) * (i % 2);
+		monkeyHeadPhysics[i].position.y = (WINDOW_Y-256) * (i / 2);;
+		monkeyHeadPhysics[i].velocity.x = 0;
+		monkeyHeadPhysics[i].velocity.y = 0;
+		monkeyHeadPhysics[i].rotation = 0;
 	}
 }
 
@@ -242,10 +233,10 @@ void update(int frame)
 	//Rotating monkey heads
 	for(int i = 0; i < 4; i++)
 	{
-		monkeyHeads[i].rot = (monkeyHeads[i].rot + 1);
-		if(monkeyHeads[i].rot < 0) monkeyHeads[i].rot += 360;
-		if(monkeyHeads[i].rot > 360) monkeyHeads[i].rot -= 360;
-		rotFrame = rotToFrame(monkeyHeads[i].rot);
+		monkeyHeadPhysics[i].rotation = (monkeyHeadPhysics[i].rotation + 1);
+		if(monkeyHeadPhysics[i].rotation < 0) monkeyHeadPhysics[i].rotation += 360;
+		if(monkeyHeadPhysics[i].rotation > 360) monkeyHeadPhysics[i].rotation -= 360;
+		rotFrame = rotToFrame(monkeyHeadPhysics[i].rotation);
 		animFrame = (frame+(30*i))%119-59;
 		if(animFrame < 0)
 		{
@@ -254,11 +245,11 @@ void update(int frame)
 		SDL_Surface *img = SDL_CreateRGBSurface(0, 128, 128, 32, 0xFF000000, 0x00FF0000, 0x0000FF00, 0x000000FF);
 		SDL_Rect srcrect = { rotFrame*128, animFrame*128, 128, 128 };
 		SDL_Rect dstrect = { 0, 0, 0, 0 };
-		SDL_BlitSurface(monkeyHeads[i].spriteSheet, &srcrect, img, &dstrect);
+		SDL_BlitSurface(monkeySpriteSheet, &srcrect, img, &dstrect);
 		SDL_Texture *texture = SDL_CreateTextureFromSurface(renderer, img);
 		SDL_SetTextureBlendMode(texture, SDL_BLENDMODE_BLEND);
-		dstrect.x = monkeyHeads[i].pos.x;
-		dstrect.y = monkeyHeads[i].pos.y;
+		dstrect.x = monkeyHeadPhysics[i].position.x;
+		dstrect.y = monkeyHeadPhysics[i].position.y;
 		dstrect.w = 256;
 		dstrect.h = 256;
 		SDL_RenderCopy(renderer, texture, NULL, &dstrect);
@@ -268,14 +259,14 @@ void update(int frame)
 	}
 
 	//TEST GameObject
-	testGameObject.rot += (-actionPressed(bindingLeft) + actionPressed(bindingRight)) * 6;
+	testEntityPhysics.rotation += (-actionPressed(bindingLeft) + actionPressed(bindingRight)) * 6;
 	if(actionPressedThisFrame(bindingQuickTurn))
 	{
-		testGameObject.rot += 180;
+		testEntityPhysics.rotation += 180;
 	}
-	if(testGameObject.rot < 0) testGameObject.rot += 360;
-	if(testGameObject.rot > 360) testGameObject.rot -= 360;
-	rotFrame = rotToFrame(testGameObject.rot);
+	if(testEntityPhysics.rotation < 0) testEntityPhysics.rotation += 360;
+	if(testEntityPhysics.rotation > 360) testEntityPhysics.rotation -= 360;
+	rotFrame = rotToFrame(testEntityPhysics.rotation);
 	/*
 	//This would cause the monkey head to float up and down.
 	//I find this undesirable for the playercontrolled one.
@@ -289,43 +280,43 @@ void update(int frame)
 	*/
 	animFrame = 59;
 
-	testGameObject.vel = multiplyVector2(rotToVector2(testGameObject.rot), (-actionPressed(bindingBack)+actionPressed(bindingForward))*15);
+	testEntityPhysics.velocity = multiplyVector2(rotToVector2(testEntityPhysics.rotation), (-actionPressed(bindingBack)+actionPressed(bindingForward))*15);
 	
-	testGameObject.pos.x += testGameObject.vel.x;
-	testGameObject.pos.y += testGameObject.vel.y;
+	testEntityPhysics.position.x += testEntityPhysics.velocity.x;
+	testEntityPhysics.position.y += testEntityPhysics.velocity.y;
 	SDL_Surface *img = SDL_CreateRGBSurface(0, 128, 128, 32, 0xFF000000, 0x00FF0000, 0x0000FF00, 0x000000FF);
 	SDL_Rect srcrect = { rotFrame*128, animFrame*128, 128, 128 };
 	SDL_Rect dstrect = { 0, 0, 0, 0 };
-	SDL_BlitSurface(testGameObject.spriteSheet, &srcrect, img, &dstrect);
+	SDL_BlitSurface(monkeySpriteSheet, &srcrect, img, &dstrect);
 	SDL_Texture *texture = SDL_CreateTextureFromSurface(renderer, img);
 	SDL_SetTextureBlendMode(texture, SDL_BLENDMODE_BLEND);
 	//SHADOW
-	dstrect.x = testGameObject.pos.x + 64;
-	dstrect.y = testGameObject.pos.y + 128 + 64;
+	dstrect.x = testEntityPhysics.position.x + 64;
+	dstrect.y = testEntityPhysics.position.y + 128 + 64;
 	dstrect.w = 128;
 	dstrect.h = 64;
 	SDL_RenderCopy(renderer, shadowTexture, NULL, &dstrect);
 	//GameObject it self
-	dstrect.x = testGameObject.pos.x;
-	dstrect.y = testGameObject.pos.y;
+	dstrect.x = testEntityPhysics.position.x;
+	dstrect.y = testEntityPhysics.position.y;
 	dstrect.w = 256;
 	dstrect.h = 256;
 	SDL_RenderCopy(renderer, texture, NULL, &dstrect);
-	if(testGameObject.pos.x > WINDOW_X)
+	if(testEntityPhysics.position.x > WINDOW_X)
 	{
-		testGameObject.pos.x -= WINDOW_X + 256;
+		testEntityPhysics.position.x -= WINDOW_X + 256;
 	}
-	if(testGameObject.pos.x < 0 - 256)
+	if(testEntityPhysics.position.x < 0 - 256)
 	{
-		testGameObject.pos.x += WINDOW_X + 256;
+		testEntityPhysics.position.x += WINDOW_X + 256;
 	}
-	if(testGameObject.pos.y > WINDOW_Y)
+	if(testEntityPhysics.position.y > WINDOW_Y)
 	{
-		testGameObject.pos.y -= WINDOW_Y + 256;
+		testEntityPhysics.position.y -= WINDOW_Y + 256;
 	}
-	if(testGameObject.pos.y < 0 - 256)
+	if(testEntityPhysics.position.y < 0 - 256)
 	{
-		testGameObject.pos.y += WINDOW_Y + 256;
+		testEntityPhysics.position.y += WINDOW_Y + 256;
 	}
 
 	SDL_FreeSurface(img);
