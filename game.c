@@ -124,10 +124,10 @@ SDL_Renderer *renderer;
 SDL_Texture *shadowTexture;
 
 int testEntity;
-physics_component testEntityPhysics;
+PhysicsComponent testEntityPhysics;
 
 int monkeyHeads[4];
-physics_component monkeyHeadPhysics[4];
+PhysicsComponent monkeyHeadPhysics[4];
 
 SDL_Surface *monkeySpriteSheet;
 
